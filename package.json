@@ -1,0 +1,15 @@
+{
+  "name": "black-candle-dungeon-rpg",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate:audio": "python tools/generate_audio.py",
+    "test": "node tests/verify-assets.js && node tests/verify-audio.js && node tests/verify-audio-generation.js && node tests/browser-smoke.js",
+    "test:assets": "node tests/verify-assets.js && node tests/verify-audio.js && node tests/verify-audio-generation.js",
+    "test:audio": "node tests/verify-audio.js && node tests/verify-audio-generation.js",
+    "test:browser": "node tests/browser-smoke.js"
+  },
+  "devDependencies": {
+    "playwright": "1.60.0"
+  }
+}

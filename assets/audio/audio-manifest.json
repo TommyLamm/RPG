@@ -1,0 +1,27 @@
+{
+  "format": {
+    "sampleRate": 44100,
+    "bitsPerSample": 16
+  },
+  "bgm": {
+    "village": { "file": "bgm-ash-village.wav", "loop": true, "channels": 2 },
+    "forest": { "file": "bgm-rotten-forest.wav", "loop": true, "channels": 2 },
+    "cave": { "file": "bgm-damp-cave.wav", "loop": true, "channels": 2 },
+    "tomb": { "file": "bgm-old-king-tomb.wav", "loop": true, "channels": 2 },
+    "combat": { "file": "bgm-combat.wav", "loop": true, "channels": 2 }
+  },
+  "sfx": {
+    "playerAttack": { "file": "sfx-player-attack.wav", "loop": false, "channels": 1 },
+    "playerHit": { "file": "sfx-player-hit.wav", "loop": false, "channels": 1 },
+    "criticalHit": { "file": "sfx-critical-hit.wav", "loop": false, "channels": 1 },
+    "monsterAttack": { "file": "sfx-monster-attack.wav", "loop": false, "channels": 1 },
+    "victory": { "file": "sfx-victory.wav", "loop": false, "channels": 1 },
+    "defeat": { "file": "sfx-defeat.wav", "loop": false, "channels": 1 },
+    "flee": { "file": "sfx-flee.wav", "loop": false, "channels": 1 },
+    "levelUp": { "file": "sfx-level-up.wav", "loop": false, "channels": 1 },
+    "potion": { "file": "sfx-potion.wav", "loop": false, "channels": 1 },
+    "purchase": { "file": "sfx-purchase.wav", "loop": false, "channels": 1 },
+    "gold": { "file": "sfx-gold.wav", "loop": false, "channels": 1 },
+    "discovery": { "file": "sfx-discovery.wav", "loop": false, "channels": 1 }
+  }
+}

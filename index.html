@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>黑燭地牢 | RPG</title>
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    :root {
+      --bg: #090807;
+      --panel: #15120f;
+      --panel-2: #201913;
+      --line: #3a2c21;
+      --text: #efe6d3;
+      --muted: #a89780;
+      --bone: #d8ccb8;
+      --moss: #6f8760;
+      --steel: #7e91a0;
+      --gold: #d6a84f;
+      --rust: #9f4f2e;
+      --blood: #8f1d1d;
+      --poison: #5f8f3a;
+      --shadow: rgba(0, 0, 0, 0.55);
+      --focus: #9eb3c2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    ::selection {
+      background: rgba(126, 145, 160, 0.42);
+      color: #fff8e8;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(159, 79, 46, 0.18), transparent 30%),
+        radial-gradient(circle at 80% 12%, rgba(111, 135, 96, 0.1), transparent 28%),
+        linear-gradient(135deg, #050403 0%, var(--bg) 50%, #120d0a 100%);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: linear-gradient(180deg, var(--panel-2), #120f0d);
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      padding: 10px 14px;
+      transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+      min-height: 44px;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+
+    button:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      transform: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+      border-color: var(--steel);
+      box-shadow: 0 0 0 4px rgba(126, 145, 160, 0.18);
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(28px, 5vw, 48px);
+      letter-spacing: 0;
+      line-height: 1.08;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      max-width: 32rem;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .black-candle-sigil {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      color: var(--bone);
+      filter: drop-shadow(0 0 10px rgba(214, 168, 79, 0.22));
+    }
+
+    .quick-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      max-width: 560px;
+      min-width: min(100%, 280px);
+    }
+
+    .topbar-tools {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      min-width: min(100%, 320px);
+    }
+
+    .language-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .language-control select {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(21, 18, 15, 0.94);
+      color: var(--text);
+      font: inherit;
+      padding: 6px 34px 6px 10px;
+      cursor: pointer;
+    }
+
+    .audio-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      max-width: 560px;
+      min-width: 0;
+    }
+
+    .audio-toggle {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      min-width: 44px;
+      padding: 0;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    .audio-toggle svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    .audio-slider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      min-width: 154px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(21, 18, 15, 0.86);
+      color: var(--muted);
+      padding: 6px 9px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .audio-slider input {
+      width: 92px;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .stat {
+      flex: 1 1 96px;
+      min-width: 96px;
+      max-width: 124px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(21, 18, 15, 0.86);
+      box-shadow: 0 10px 30px var(--shadow);
+      padding: 8px 10px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat strong {
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .nav button {
+      flex: 0 1 auto;
+      min-width: 118px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .log-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(32, 25, 19, 0.96), rgba(14, 12, 10, 0.98));
+      box-shadow: 0 18px 45px var(--shadow);
+      padding: 18px;
+    }
+
+    .panel {
+      min-height: 420px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, rgba(216, 204, 184, 0.045), transparent 38%),
+        radial-gradient(circle at 18px 18px, rgba(126, 145, 160, 0.08) 0 1px, transparent 1.5px);
+      background-size: auto, 28px 28px;
+      opacity: 0.7;
+    }
+
+    .panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel h2,
+    .log-panel h2 {
+      margin: 0 0 10px;
+      color: var(--gold);
+      font-size: 22px;
+      letter-spacing: 0;
+      line-height: 1.25;
+    }
+
+    .panel h3,
+    .log-panel h3 {
+      line-height: 1.3;
+    }
+
+    .panel p,
+    .log-panel p {
+      max-width: 68ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .actions button {
+      flex: 0 1 auto;
+      min-width: 112px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .guide {
+      border-left: 3px solid var(--moss);
+      background: rgba(111, 135, 96, 0.1);
+      color: var(--text);
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .log-list p {
+      margin: 0;
+      border-bottom: 1px solid rgba(58, 44, 33, 0.7);
+      color: var(--muted);
+      padding-bottom: 10px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .info-grid div {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(21, 18, 15, 0.72);
+      padding: 10px 12px;
+      min-width: 0;
+    }
+
+    .shop-card {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) minmax(112px, auto);
+      gap: 16px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(21, 18, 15, 0.72);
+      margin-top: 16px;
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .shop-card h3 {
+      margin: 0 0 6px;
+      color: var(--gold);
+      font-size: 18px;
+    }
+
+    .shop-card p {
+      margin: 2px 0;
+    }
+
+    .shop-card .actions {
+      margin-top: 0;
+    }
+
+    .item-icon {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 62px;
+      height: 62px;
+      border: 1px solid rgba(214, 168, 79, 0.42);
+      border-radius: 8px;
+      background: linear-gradient(150deg, rgba(214, 168, 79, 0.1), rgba(126, 145, 160, 0.08));
+      font-size: 30px;
+      line-height: 1;
+      overflow: hidden;
+    }
+
+    .potion-art {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 5px;
+      filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.55));
+    }
+
+    .scene-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 7;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 70% 24%, rgba(159, 79, 46, 0.16), transparent 30%),
+        linear-gradient(135deg, #15120f, #070605);
+      isolation: isolate;
+      margin: 12px 0 18px;
+    }
+
+    .scene-stage.compact {
+      aspect-ratio: 16 / 5;
+    }
+
+    .scene-art {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .scene-stage::after {
+      content: "";
+      position: absolute;
+      inset: 32% 0 0;
+      z-index: 1;
+      background: linear-gradient(transparent, rgba(5, 4, 3, 0.94));
+      pointer-events: none;
+    }
+
+    .scene-caption {
+      position: absolute;
+      inset: auto 16px 14px;
+      z-index: 3;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      pointer-events: none;
+    }
+
+    .scene-copy {
+      min-width: 0;
+      max-width: min(58%, 38rem);
+      text-shadow: 0 2px 12px #000, 0 1px 2px #000;
+    }
+
+    .scene-location,
+    .scene-status {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .scene-location {
+      color: #fff4dc;
+      font-size: clamp(17px, 2.4vw, 24px);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .scene-status {
+      margin-top: 3px;
+      color: var(--bone);
+      font-size: 13px;
+    }
+
+    .danger-marker {
+      flex: 0 0 auto;
+      border: 1px solid rgba(214, 168, 79, 0.72);
+      border-radius: 4px;
+      background: rgba(74, 14, 12, 0.86);
+      color: #ffe4ad;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 7px 9px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    }
+
+    .monster-art {
+      position: absolute;
+      z-index: 2;
+      right: 5%;
+      bottom: 0;
+      width: min(42%, 360px);
+      height: 92%;
+      object-fit: contain;
+      object-position: center bottom;
+      filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.72));
+    }
+
+    .scene-stage.strong-enemy .monster-art {
+      filter:
+        drop-shadow(0 18px 24px rgba(0, 0, 0, 0.72))
+        drop-shadow(0 0 18px rgba(159, 79, 46, 0.72));
+    }
+
+    .scene-failed .scene-art,
+    .monster-failed .monster-art,
+    .potion-failed .potion-art {
+      display: none;
+    }
+
+    img[hidden] {
+      display: none !important;
+    }
+
+    .combat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .combatant {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(21, 18, 15, 0.72);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .combatant.danger {
+      border-color: rgba(143, 29, 29, 0.82);
+      background: rgba(44, 14, 12, 0.72);
+    }
+
+    .combatant h3 {
+      margin: 0 0 10px;
+      color: var(--gold);
+      font-size: 18px;
+    }
+
+    .meter {
+      overflow: hidden;
+      height: 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #080706;
+      margin: 8px 0 10px;
+      min-width: 0;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--poison), #9fca62);
+    }
+
+    .meter.enemy span {
+      background: linear-gradient(90deg, var(--blood), var(--rust));
+    }
+
+    .combat-log {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      max-height: 240px;
+      overflow: auto;
+    }
+
+    .combat-log p {
+      margin: 0;
+      border-bottom: 1px solid rgba(58, 44, 33, 0.7);
+      color: var(--muted);
+      padding-bottom: 8px;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        width: min(100% - 20px, 680px);
+        padding: 16px 0;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .quick-stats {
+        justify-content: flex-start;
+      }
+
+      .topbar-tools,
+      .audio-controls {
+        align-items: stretch;
+        justify-content: flex-start;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .combat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav button,
+      .actions button {
+        flex: 1 1 140px;
+        min-width: min(100%, 140px);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .brand-row {
+        gap: 10px;
+      }
+
+      .black-candle-sigil {
+        width: 34px;
+        height: 34px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .shop-card {
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .item-icon {
+        width: 54px;
+        height: 54px;
+      }
+
+      .scene-stage,
+      .scene-stage.compact {
+        aspect-ratio: 4 / 3;
+      }
+
+      .monster-art {
+        right: 16%;
+        width: 68%;
+        height: 84%;
+      }
+
+      .scene-caption {
+        inset: auto 12px 10px;
+        gap: 8px;
+      }
+
+      .scene-copy {
+        max-width: 72%;
+      }
+
+      .scene-location {
+        font-size: 18px;
+      }
+
+      .shop-card .actions {
+        grid-column: 1 / -1;
+      }
+
+      .audio-slider {
+        flex: 1 1 150px;
+        min-width: min(100%, 150px);
+      }
+
+      .audio-slider input {
+        flex: 1 1 auto;
+        width: min(120px, 38vw);
+      }
+    }
+
+    @media (max-width: 360px) {
+      .app {
+        width: calc(100% - 16px);
+      }
+
+      .brand h1 {
+        font-size: 27px;
+      }
+
+      .stat {
+        max-width: none;
+      }
+
+      .shop-card {
+        grid-template-columns: 48px minmax(0, 1fr);
+      }
+
+      .item-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 26px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+
+      button:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app"></div>
+  <div id="game-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <script>
+    const app = document.getElementById("app");
+    const gameAnnouncer = document.getElementById("game-announcer");
+    const MAX_LEVEL = 100;
+    const POTION_PRICE = 15;
+    const POTION_HEAL = { min: 5, max: 18 };
+    const monsterNames = ["史莱姆", "哥布林", "骷髅兵", "野狼", "暗影兽", "腐肉守卫", "墓穴猎手", "黑烛信徒"];
+    const sceneAssets = [
+      "assets/images/scene-ash-village.webp",
+      "assets/images/scene-rotten-forest.webp",
+      "assets/images/scene-damp-cave.webp",
+      "assets/images/scene-old-king-tomb.webp"
+    ];
+    const monsterAssets = {
+      "史莱姆": "assets/images/monster-slime.webp",
+      "哥布林": "assets/images/monster-goblin.webp",
+      "骷髅兵": "assets/images/monster-skeleton.webp",
+      "野狼": "assets/images/monster-wolf.webp",
+      "暗影兽": "assets/images/monster-shadow-beast.webp",
+      "腐肉守卫": "assets/images/monster-flesh-guard.webp",
+      "墓穴猎手": "assets/images/monster-tomb-hunter.webp",
+      "黑烛信徒": "assets/images/monster-black-candle-cultist.webp"
+    };
+    const SHOP_SCENE_ASSET = "assets/images/scene-black-candle-shop.webp";
+    const POTION_ASSET = "assets/images/item-black-candle-potion.webp";
+    const AUDIO_BASE = "assets/audio/";
+    const BGM_ASSETS = {
+      village: `${AUDIO_BASE}bgm-ash-village.wav`,
+      forest: `${AUDIO_BASE}bgm-rotten-forest.wav`,
+      cave: `${AUDIO_BASE}bgm-damp-cave.wav`,
+      tomb: `${AUDIO_BASE}bgm-old-king-tomb.wav`,
+      combat: `${AUDIO_BASE}bgm-combat.wav`
+    };
+    const SFX_ASSETS = {
+      playerAttack: `${AUDIO_BASE}sfx-player-attack.wav`,
+      playerHit: `${AUDIO_BASE}sfx-player-hit.wav`,
+      criticalHit: `${AUDIO_BASE}sfx-critical-hit.wav`,
+      monsterAttack: `${AUDIO_BASE}sfx-monster-attack.wav`,
+      victory: `${AUDIO_BASE}sfx-victory.wav`,
+      defeat: `${AUDIO_BASE}sfx-defeat.wav`,
+      flee: `${AUDIO_BASE}sfx-flee.wav`,
+      levelUp: `${AUDIO_BASE}sfx-level-up.wav`,
+      potion: `${AUDIO_BASE}sfx-potion.wav`,
+      purchase: `${AUDIO_BASE}sfx-purchase.wav`,
+      gold: `${AUDIO_BASE}sfx-gold.wav`,
+      discovery: `${AUDIO_BASE}sfx-discovery.wav`
+    };
+    const AUDIO_SETTINGS_KEY = "black-candle-audio-v1";
+    const DEFAULT_AUDIO_SETTINGS = Object.freeze({ muted: false, musicVolume: 0.42, sfxVolume: 0.72 });
+    const LANGUAGE_KEY = "black-candle-language-v1";
+    const DEFAULT_LANGUAGE = "zhHant";
+    const LANGUAGES = {
+      zhHant: { label: "繁體中文", htmlLang: "zh-Hant" },
+      en: { label: "English", htmlLang: "en" }
+    };
+    const I18N = {
+      zhHant: {
+        gameTitle: "黑燭地牢",
+        gameSubtitle: "黑蠟封住村門，墓穴深處仍有燭火。",
+        language: "語言",
+        languageZhHant: "繁體中文",
+        languageEn: "English",
+        screens: {
+          main: "主介面",
+          adventure: "劇情冒險",
+          combat: "戰鬥",
+          shop: "商店",
+          profile: "個人資訊",
+          inventory: "背包"
+        },
+        stats: {
+          level: "等級",
+          hp: "生命",
+          exp: "經驗",
+          gold: "金幣",
+          potions: "藥劑",
+          characterStatus: "角色狀態"
+        },
+        audio: {
+          controls: "音訊控制",
+          mute: "靜音",
+          unmute: "取消靜音",
+          music: "音樂",
+          sfx: "音效",
+          musicVolume: "音樂音量",
+          sfxVolume: "音效音量"
+        },
+        common: {
+          noCombatRecords: "暫無戰鬥記錄。",
+          logs: "日誌",
+          currentStatus: "當前狀態",
+          progressedEvents: "已推進事件",
+          strongEnemy: "強敵",
+          eventCount: "{count} 次"
+        },
+        actions: {
+          startAdventure: "開始冒險",
+          goShop: "前往商店",
+          viewProfile: "查看個人資訊",
+          enterForest: "進入森林",
+          exploreCave: "探索洞穴",
+          goVillage: "前往村莊",
+          challengeMonster: "挑戰怪物",
+          rest: "返回休息",
+          goDeeper: "繼續深入",
+          returnAdventure: "返回冒險",
+          attack: "攻擊",
+          usePotion: "使用藥劑",
+          flee: "逃跑",
+          buy: "購買"
+        },
+        main: {
+          placeholder: "潮濕石牆吞下腳步聲。這裡將顯示探索、戰鬥與休整內容。",
+          guide: "新玩家指南：先進入劇情冒險推進當前進度，受傷後回到村莊休息；金幣可在商店購買治療藥劑。"
+        },
+        shop: {
+          heading: "商店介面",
+          location: "黑燭商店",
+          status: "灰燼村",
+          description: "黑蠟燭光映著貨架，店主悄聲遞出一瓶仍有溫度的藥劑。",
+          potionName: "黑燭藥劑",
+          price: "藥劑售價：{price} 金幣",
+          healRange: "隨機恢復 {min} 到 {max} 點生命值",
+          healCap: "恢復量不會超過生命值上限。",
+          cannotAffordInline: "金幣不足：黑燭藥劑需要 {price} 金幣。"
+        },
+        profile: {
+          maxLevel: "已達上限",
+          labels: {
+            level: "玩家等級",
+            exp: "當前經驗值",
+            nextExp: "升級所需經驗",
+            hp: "當前生命值 / 生命值上限",
+            attack: "攻擊力",
+            defense: "防禦力",
+            gold: "金幣數量",
+            potions: "藥劑數量",
+            status: "當前劇情進度或冒險狀態"
+          }
+        },
+        inventory: {
+          heading: "背包或道具使用介面",
+          potionCount: "黑燭藥劑 x {count}",
+          healRange: "隨機恢復 {min} 到 {max} 點生命值",
+          currentHp: "當前生命值：{hp} / {maxHp}"
+        },
+        combat: {
+          heading: "戰鬥介面",
+          player: "玩家",
+          enemyHp: "敵人生命：{hp} / {maxHp}",
+          hp: "HP：{hp} / {maxHp}",
+          attack: "攻擊力：{attack}",
+          defense: "防禦力：{defense}",
+          noEnemy: "當前沒有敵人。",
+          logHeading: "戰鬥日誌",
+          status: "戰鬥中"
+        }
+      },
+      en: {
+        gameTitle: "Black Candle Dungeon",
+        gameSubtitle: "Black wax seals the village gate, yet a candle still burns below the tomb.",
+        language: "Language",
+        languageZhHant: "Traditional Chinese",
+        languageEn: "English",
+        screens: {
+          main: "Main",
+          adventure: "Adventure",
+          combat: "Combat",
+          shop: "Shop",
+          profile: "Profile",
+          inventory: "Inventory"
+        },
+        stats: {
+          level: "Level",
+          hp: "HP",
+          exp: "EXP",
+          gold: "Gold",
+          potions: "Potions",
+          characterStatus: "Character status"
+        },
+        audio: {
+          controls: "Audio controls",
+          mute: "Mute",
+          unmute: "Unmute",
+          music: "Music",
+          sfx: "SFX",
+          musicVolume: "Music volume",
+          sfxVolume: "SFX volume"
+        },
+        common: {
+          noCombatRecords: "No combat records yet.",
+          logs: "Logs",
+          currentStatus: "Current status",
+          progressedEvents: "Progressed events",
+          strongEnemy: "Strong enemy",
+          eventCount: "{count} times"
+        },
+        actions: {
+          startAdventure: "Start adventure",
+          goShop: "Go to shop",
+          viewProfile: "View profile",
+          enterForest: "Enter forest",
+          exploreCave: "Explore cave",
+          goVillage: "Go to village",
+          challengeMonster: "Challenge monster",
+          rest: "Return and rest",
+          goDeeper: "Go deeper",
+          returnAdventure: "Return to adventure",
+          attack: "Attack",
+          usePotion: "Use potion",
+          flee: "Flee",
+          buy: "Buy"
+        },
+        main: {
+          placeholder: "Damp stone walls swallow your footsteps. Exploration, combat, and recovery will appear here.",
+          guide: "New player guide: enter the story adventure to progress, return to the village to rest when injured, and spend gold at the shop for healing potions."
+        },
+        shop: {
+          heading: "Shop",
+          location: "Black Candle Shop",
+          status: "Ash Village",
+          description: "Black candlelight falls over the shelves as the shopkeeper quietly offers a still-warm potion.",
+          potionName: "Black Candle Potion",
+          price: "Potion price: {price} gold",
+          healRange: "Restores {min} to {max} HP at random",
+          healCap: "Healing cannot exceed your maximum HP.",
+          cannotAffordInline: "Not enough gold: a Black Candle Potion costs {price} gold."
+        },
+        profile: {
+          maxLevel: "Max level reached",
+          labels: {
+            level: "Player level",
+            exp: "Current experience",
+            nextExp: "Experience needed to level up",
+            hp: "Current HP / Max HP",
+            attack: "Attack",
+            defense: "Defense",
+            gold: "Gold",
+            potions: "Potions",
+            status: "Current story progress or adventure status"
+          }
+        },
+        inventory: {
+          heading: "Inventory or item use",
+          potionCount: "Black Candle Potion x {count}",
+          healRange: "Restores {min} to {max} HP at random",
+          currentHp: "Current HP: {hp} / {maxHp}"
+        },
+        combat: {
+          heading: "Combat",
+          player: "Player",
+          enemyHp: "Enemy HP: {hp} / {maxHp}",
+          hp: "HP: {hp} / {maxHp}",
+          attack: "Attack: {attack}",
+          defense: "Defense: {defense}",
+          noEnemy: "There is no enemy right now.",
+          logHeading: "Combat log",
+          status: "In combat"
+        }
+      }
+    };
+    const defaultSceneAsset = sceneAssets[0];
+    const knownSceneAssets = new Set([...sceneAssets, SHOP_SCENE_ASSET]);
+    const SCREENS = {
+      main: "screens.main",
+      adventure: "screens.adventure",
+      combat: "screens.combat",
+      shop: "screens.shop",
+      profile: "screens.profile",
+      inventory: "screens.inventory"
+    };
+
+    const stages = [
+      {
+        name: "灰烬村入口",
+        description: "塌陷的木门半掩着，黑蜡沿门缝凝成冷硬的痕迹。"
+      },
+      {
+        name: "腐烂森林",
+        description: "腐叶与雾气覆盖小径，枯枝深处偶尔传来拖行声。"
+      },
+      {
+        name: "潮湿洞穴",
+        description: "水滴敲在石面上，回声像有人在更深处低语。"
+      },
+      {
+        name: "旧王墓穴",
+        description: "石棺环绕着熄灭的祭台，墓壁上的王冠纹章仍有余温。"
+      }
+    ];
+
+    const state = {
+      activeScreen: "main",
+      player: {
+        level: 1,
+        maxLevel: 100,
+        maxHp: 20,
+        hp: 20,
+        attack: 5,
+        defense: 3,
+        exp: 0,
+        gold: 30,
+        potions: 0
+      },
+      story: {
+        stage: 0,
+        progress: 0,
+        status: "灰烬村入口",
+        clueFound: false,
+        keyFragment: false
+      },
+      currentMonster: null,
+      logs: ["新手指南：先从主界面进入剧情冒险，熟悉村口、森林与洞穴的危险。"],
+      combatLogs: []
+    };
+    let logRevision = 0;
+    let combatLogRevision = 0;
+    let lastAnnouncedLogRevision = 0;
+    let lastAnnouncedCombatLogRevision = 0;
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function sanitizeLanguage(language) {
+      return Object.prototype.hasOwnProperty.call(LANGUAGES, language) ? language : DEFAULT_LANGUAGE;
+    }
+
+    function loadLanguage() {
+      try {
+        return sanitizeLanguage(localStorage.getItem(LANGUAGE_KEY));
+      } catch (error) {
+        return DEFAULT_LANGUAGE;
+      }
+    }
+
+    let currentLanguage = loadLanguage();
+    document.documentElement.lang = LANGUAGES[currentLanguage].htmlLang;
+
+    function interpolate(template, params = {}) {
+      return String(template).replace(/\{([^{}]+)\}/g, (match, key) => {
+        const value = params[key.trim()];
+        return value == null ? "" : String(value);
+      });
+    }
+
+    function getTranslationValue(dictionary, key) {
+      return key.split(".").reduce((value, part) => (
+        value && Object.prototype.hasOwnProperty.call(value, part) ? value[part] : undefined
+      ), dictionary);
+    }
+
+    function t(key, params = {}) {
+      const activeDictionary = I18N[currentLanguage] || I18N[DEFAULT_LANGUAGE];
+      const fallbackDictionary = I18N[DEFAULT_LANGUAGE];
+      const template = getTranslationValue(activeDictionary, key) ?? getTranslationValue(fallbackDictionary, key) ?? key;
+      return interpolate(template, params);
+    }
+
+    function setLanguage(language) {
+      currentLanguage = sanitizeLanguage(language);
+      document.documentElement.lang = LANGUAGES[currentLanguage].htmlLang;
+      try {
+        localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+      } catch (error) {
+        // Language changes must still apply in restricted storage contexts.
+      }
+      render();
+    }
+
+    function nextLevelExp(level = state.player.level) {
+      if (level >= MAX_LEVEL) {
+        return 0;
+      }
+
+      return 20 + (level - 1) * 15;
+    }
+
+    function experienceText() {
+      if (state.player.level >= MAX_LEVEL) {
+        return "MAX";
+      }
+
+      return `${state.player.exp} / ${nextLevelExp()}`;
+    }
+
+    function calculateDamage(attack, defense) {
+      return Math.max(1, attack - defense);
+    }
+
+    function meter(current, max, kind = "") {
+      const safeMax = Math.max(1, max);
+      const percentage = clamp((current / safeMax) * 100, 0, 100);
+      const className = kind ? `meter ${kind}` : "meter";
+
+      return `<div class="${className}" aria-hidden="true"><span style="width: ${percentage}%"></span></div>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function currentStage() {
+      const rawStage = Number(state.story.stage);
+      const safeStage = Number.isFinite(rawStage) ? Math.floor(rawStage) : 0;
+      const stageIndex = clamp(safeStage, 0, stages.length - 1);
+      return stages[stageIndex] || stages[0];
+    }
+
+    function currentSceneAsset() {
+      const rawStage = Number(state.story.stage);
+      const safeStage = Number.isFinite(rawStage) ? Math.floor(rawStage) : 0;
+      const stageIndex = clamp(safeStage, 0, sceneAssets.length - 1);
+      return sceneAssets[stageIndex] || sceneAssets[0];
+    }
+
+    function monsterAsset(name) {
+      const baseName = String(name || "")
+        .replace(/^强敌\s*/, "")
+        .replace(/（强敌）$/, "")
+        .trim();
+      return monsterAssets[baseName] || "";
+    }
+
+    function handleAssetError(image) {
+      image.hidden = true;
+      const visual = image.closest("[data-visual]");
+
+      if (image.classList.contains("scene-art")) {
+        visual?.classList.add("scene-failed");
+      } else if (image.classList.contains("monster-art")) {
+        visual?.classList.add("monster-failed");
+      } else if (image.classList.contains("potion-art")) {
+        visual?.classList.add("potion-failed");
+      }
+    }
+
+    function handleAssetLoad(image) {
+      image.hidden = false;
+    }
+
+    function renderPotionImage(className = "potion-art") {
+      return `<img class="${escapeHtml(className)}" src="${POTION_ASSET}" alt="${escapeHtml(t("shop.potionName"))}" decoding="async" hidden onload="handleAssetLoad(this)" onerror="handleAssetError(this)">`;
+    }
+
+    function renderSceneStage({ scene, location, status, monster = null, compact = false }) {
+      const requestedScene = String(scene || "");
+      const sceneSource = escapeHtml(knownSceneAssets.has(requestedScene) ? requestedScene : defaultSceneAsset);
+      const locationLabel = escapeHtml(location || "未知区域");
+      const statusLabel = escapeHtml(status || "");
+      const monsterName = monster ? String(monster.name || "") : "";
+      const monsterSource = monsterAsset(monsterName);
+      const strongEnemy = Boolean(monster && monster.strong);
+      const stageClasses = ["scene-stage", compact ? "compact" : "", strongEnemy ? "strong-enemy" : ""]
+        .filter(Boolean)
+        .join(" ");
+
+      return `
+        <div class="${stageClasses}" data-visual="scene-stage">
+          <img class="scene-art" src="${sceneSource}" alt="" loading="eager" decoding="async" hidden onload="handleAssetLoad(this)" onerror="handleAssetError(this)">
+          ${monster && monsterSource ? `<img class="monster-art" src="${escapeHtml(monsterSource)}" alt="${escapeHtml(monsterName)}" loading="eager" decoding="async" hidden onload="handleAssetLoad(this)" onerror="handleAssetError(this)">` : ""}
+          <div class="scene-caption">
+            <div class="scene-copy">
+              <span class="scene-location">${locationLabel}</span>
+              ${statusLabel ? `<span class="scene-status">${statusLabel}</span>` : ""}
+            </div>
+            ${strongEnemy ? `<span class="danger-marker">${escapeHtml(t("common.strongEnemy"))}</span>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function sceneStage(options) {
+      return renderSceneStage(options);
+    }
+
+    function addLog(message) {
+      state.logs.unshift(message);
+      state.logs = state.logs.slice(0, 8);
+      logRevision += 1;
+    }
+
+    function addCombatLog(message) {
+      state.combatLogs.push(message);
+      state.combatLogs = state.combatLogs.slice(-8);
+      combatLogRevision += 1;
+    }
+
+    function controlFocusKey(control) {
+      const stableKey = control.getAttribute("data-focus-key");
+      if (stableKey) {
+        return `${control.tagName}|${stableKey}`;
+      }
+
+      const action = control.getAttribute("onclick") || control.getAttribute("oninput") || control.getAttribute("onchange") || "";
+      const label = control.getAttribute("aria-label") || control.textContent.trim().replace(/\s+/g, " ");
+      return `${control.tagName}|${control.type || ""}|${action}|${label}`;
+    }
+
+    function updateGameAnnouncer() {
+      const latestLog = state.logs[0] || "";
+      const latestCombatLog = state.combatLogs[state.combatLogs.length - 1] || "";
+      const messages = [];
+
+      if (logRevision !== lastAnnouncedLogRevision && latestLog) {
+        messages.push(latestLog);
+      }
+
+      if (combatLogRevision !== lastAnnouncedCombatLogRevision && latestCombatLog) {
+        messages.push(latestCombatLog);
+      }
+
+      lastAnnouncedLogRevision = logRevision;
+      lastAnnouncedCombatLogRevision = combatLogRevision;
+
+      if (messages.length) {
+        const announcement = messages.join(" ");
+        gameAnnouncer.textContent = "";
+        queueMicrotask(() => {
+          gameAnnouncer.textContent = announcement;
+        });
+      }
+    }
+
+    function hasActiveCombat() {
+      return Boolean(state.currentMonster && state.currentMonster.hp > 0 && state.player.hp > 0);
+    }
+
+    function createAudioController() {
+      const canUseAudio = typeof Audio === "function";
+      const failedAssets = new Set();
+      const sfxPools = new Map();
+      const decks = canUseAudio ? [new Audio(), new Audio()] : [];
+      let activeDeckIndex = 0;
+      let currentBgmKey = "";
+      let unlocked = false;
+      let isReportingFailure = false;
+      let settings = loadSettings();
+
+      decks.forEach((deck) => {
+        deck.loop = true;
+        deck.preload = "auto";
+        deck.volume = 0;
+        deck.dataset.assetKey = "";
+        deck.addEventListener("error", () => reportAudioFailure(deck.dataset.assetKey || deck.src || "BGM"));
+      });
+
+      document.addEventListener("visibilitychange", applyBgmVolume);
+
+      function sanitizeVolume(value, fallback) {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? clamp(numeric, 0, 1) : fallback;
+      }
+
+      function loadSettings() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY) || "null");
+          if (!saved || typeof saved !== "object") {
+            return { ...DEFAULT_AUDIO_SETTINGS };
+          }
+
+          return {
+            muted: typeof saved.muted === "boolean" ? saved.muted : DEFAULT_AUDIO_SETTINGS.muted,
+            musicVolume: sanitizeVolume(saved.musicVolume, DEFAULT_AUDIO_SETTINGS.musicVolume),
+            sfxVolume: sanitizeVolume(saved.sfxVolume, DEFAULT_AUDIO_SETTINGS.sfxVolume)
+          };
+        } catch (error) {
+          return { ...DEFAULT_AUDIO_SETTINGS };
+        }
+      }
+
+      function saveSettings() {
+        localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify(settings));
+      }
+
+      function bgmVolume() {
+        const visibilityMultiplier = document.hidden ? 0.25 : 1;
+        return settings.muted ? 0 : settings.musicVolume * visibilityMultiplier;
+      }
+
+      function sfxVolume() {
+        return settings.muted ? 0 : settings.sfxVolume;
+      }
+
+      function desiredBgmKey() {
+        if (hasActiveCombat()) {
+          return "combat";
+        }
+
+        const stageKey = ["village", "forest", "cave", "tomb"][clamp(Math.floor(Number(state.story.stage) || 0), 0, 3)];
+        return stageKey || "village";
+      }
+
+      function applyBgmVolume() {
+        if (!decks.length) {
+          return;
+        }
+
+        decks[activeDeckIndex].volume = bgmVolume();
+      }
+
+      function crossfade(fromDeck, toDeck, duration = 1200) {
+        const start = performance.now();
+        const fromStart = fromDeck.volume;
+        const target = bgmVolume();
+
+        function step(now) {
+          const progress = clamp((now - start) / duration, 0, 1);
+          toDeck.volume = target * progress;
+          fromDeck.volume = fromStart * (1 - progress);
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            fromDeck.pause();
+            fromDeck.currentTime = 0;
+            fromDeck.volume = 0;
+            toDeck.volume = target;
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      function reportAudioFailure(asset) {
+        const key = String(asset || "audio");
+        if (failedAssets.has(key) || isReportingFailure) {
+          return;
+        }
+
+        failedAssets.add(key);
+        isReportingFailure = true;
+        addLog("音频播放受限：浏览器拒绝了一个声音资源，游戏仍可继续。");
+        render();
+        isReportingFailure = false;
+      }
+
+      function playElement(element, asset) {
+        const playResult = element.play();
+        if (playResult && typeof playResult.catch === "function") {
+          playResult.catch(() => reportAudioFailure(asset));
+        }
+      }
+
+      function syncBgm() {
+        if (!unlocked || !decks.length) {
+          return;
+        }
+
+        const key = desiredBgmKey();
+        const asset = BGM_ASSETS[key];
+        if (!asset || failedAssets.has(asset) || key === currentBgmKey) {
+          applyBgmVolume();
+          return;
+        }
+
+        const nextDeckIndex = activeDeckIndex === 0 ? 1 : 0;
+        const fromDeck = decks[activeDeckIndex];
+        const toDeck = decks[nextDeckIndex];
+        toDeck.src = asset;
+        toDeck.dataset.assetKey = asset;
+        toDeck.loop = true;
+        toDeck.preload = "auto";
+        toDeck.currentTime = 0;
+        toDeck.volume = 0;
+        activeDeckIndex = nextDeckIndex;
+        currentBgmKey = key;
+        playElement(toDeck, asset);
+        crossfade(fromDeck, toDeck, key === "combat" ? 1000 : 1200);
+      }
+
+      function unlock() {
+        if (unlocked) {
+          return;
+        }
+
+        unlocked = true;
+        syncBgm();
+      }
+
+      function playSfx(key) {
+        if (!unlocked || !canUseAudio) {
+          return;
+        }
+
+        const asset = SFX_ASSETS[key];
+        if (!asset || failedAssets.has(asset)) {
+          return;
+        }
+
+        const pool = sfxPools.get(key) || [];
+        let voice = pool.find((item) => item.paused || item.ended);
+        if (!voice && pool.length < 4) {
+          voice = new Audio(asset);
+          voice.preload = "auto";
+          voice.addEventListener("error", () => reportAudioFailure(asset));
+          pool.push(voice);
+          sfxPools.set(key, pool);
+        }
+
+        if (!voice) {
+          voice = pool[0];
+        }
+
+        voice.src = asset;
+        voice.loop = false;
+        voice.volume = sfxVolume();
+        voice.currentTime = 0;
+        playElement(voice, asset);
+      }
+
+      function toggleMute() {
+        settings = { ...settings, muted: !settings.muted };
+        saveSettings();
+        applyBgmVolume();
+        render();
+      }
+
+      function setMusicVolume(value) {
+        settings = { ...settings, musicVolume: clamp(Number(value), 0, 1) };
+        saveSettings();
+        applyBgmVolume();
+        render();
+      }
+
+      function setSfxVolume(value) {
+        settings = { ...settings, sfxVolume: clamp(Number(value), 0, 1) };
+        saveSettings();
+        render();
+      }
+
+      function getSettings() {
+        return { ...settings };
+      }
+
+      function getDebugState() {
+        return {
+          unlocked,
+          currentBgmKey,
+          failedAssets: [...failedAssets],
+          poolSizes: Object.fromEntries([...sfxPools.entries()].map(([key, pool]) => [key, pool.length]))
+        };
+      }
+
+      return {
+        unlock,
+        syncBgm,
+        playSfx,
+        toggleMute,
+        setMusicVolume,
+        setSfxVolume,
+        getSettings,
+        getDebugState
+      };
+    }
+
+    const audioController = createAudioController();
+
+    function setScreen(screen) {
+      if (!SCREENS[screen]) {
+        return;
+      }
+
+      if (screen !== "combat" && hasActiveCombat()) {
+        state.activeScreen = "combat";
+        addCombatLog("战斗尚未结束，只能攻击、使用药品或尝试逃跑。");
+        render();
+        return;
+      }
+
+      state.activeScreen = screen;
+      render();
+    }
+
+    function advanceStory(reason) {
+      state.story.progress += 1;
+
+      if (state.story.stage === 0 && state.story.progress >= 2) {
+        state.story.stage = 1;
+        state.story.status = "腐烂森林";
+        audioController.playSfx("discovery");
+        addLog("腐烂森林的雾墙散开，村外旧路终于露出轮廓。");
+        return;
+      }
+
+      if (state.story.stage === 1 && state.story.progress >= 5) {
+        state.story.stage = 2;
+        state.story.status = "潮湿洞穴";
+        audioController.playSfx("discovery");
+        addLog("潮湿洞穴传来空洞回声，黑蜡痕迹一路延伸到地下。");
+        return;
+      }
+
+      if (state.story.stage === 2 && state.story.progress >= 9) {
+        state.story.stage = 3;
+        state.story.status = "旧王墓穴";
+        audioController.playSfx("discovery");
+        addLog("旧王墓穴的石门缓缓错开，冷风卷着残烛气味扑面而来。");
+        return;
+      }
+
+      if (reason) {
+        if (reason.startsWith("特殊剧情")) {
+          audioController.playSfx("discovery");
+        }
+        addLog(reason);
+      }
+    }
+
+    function gainGold(amount, reason) {
+      state.player.gold += amount;
+      audioController.playSfx("gold");
+      addLog(`${reason} 获得 ${amount} 金币。`);
+    }
+
+    function gainPotion(reason) {
+      state.player.potions += 1;
+      addLog(`${reason} 你找到了一瓶治疗药水。`);
+    }
+
+    function restAtVillage() {
+      const { player } = state;
+
+      if (player.hp >= player.maxHp) {
+        addLog("你在村口短暂歇脚，但生命值已满，无需治疗。");
+      } else {
+        const missingHp = player.maxHp - player.hp;
+        const restoredHp = Math.min(Math.ceil(player.maxHp * 0.35), missingHp);
+        player.hp += restoredHp;
+        addLog(`你靠着余烬休息片刻，恢复 ${restoredHp} 点生命。`);
+      }
+
+      state.activeScreen = "adventure";
+    }
+
+    function resolveAdventureEvent(source) {
+      if (source === "village") {
+        const event = rand(1, 3);
+
+        if (event === 1) {
+          gainGold(rand(4, 9), "你帮村民清理封门黑蜡，");
+        } else if (event === 2) {
+          gainPotion("你在废弃药柜里翻找，");
+        } else {
+          advanceStory("村井边的老人低声提醒你：森林里的烛影会跟着活人移动。");
+          return;
+        }
+
+        advanceStory();
+        return;
+      }
+
+      if (source === "forest" && state.story.stage === 0) {
+        addLog("第一只腐枝怪从雾里扑出，通往森林的路必须用武器打开。");
+        startCombat(false, "forest");
+        return;
+      }
+
+      if (source === "cave" && state.story.stage < 1) {
+        addLog("洞穴入口被腐藤和黑蜡封住，先调查森林才能找到入口。");
+        return;
+      }
+
+      if (source === "deep" && state.story.stage < 2) {
+        addLog("更深处的石阶沉在积水下，缺少洞穴线索前无法继续。");
+        return;
+      }
+
+      const roll = rand(1, 100);
+
+      if (roll <= 34) {
+        startCombat(false, source);
+        return;
+      }
+
+      if (roll <= 52) {
+        startCombat(true, source);
+        return;
+      }
+
+      if (roll <= 70) {
+        gainGold(rand(6, 14), "你在裂开的石缝里摸到旧钱袋，");
+        advanceStory();
+        return;
+      }
+
+      if (roll <= 84) {
+        gainPotion("你沿着干涸血迹搜寻，");
+        advanceStory();
+        return;
+      }
+
+      if (state.story.stage >= 2) {
+        state.story.keyFragment = true;
+        advanceStory("特殊剧情：你从墓纹碎片里拼出旧王印记的一角。");
+        return;
+      }
+
+      if (state.story.stage >= 1) {
+        state.story.clueFound = true;
+        advanceStory("特殊剧情：你记下黑蜡祭祀留下的洞穴暗号。");
+        return;
+      }
+
+      advanceStory("你听见远处钟声倒响，像是有人在催促你继续前进。");
+    }
+
+    function handleAdventureChoice(choice) {
+      if (choice === "rest") {
+        restAtVillage();
+      } else {
+        resolveAdventureEvent(choice);
+      }
+
+      if (state.activeScreen !== "combat") {
+        render();
+      }
+    }
+
+    function generateMonster(strong = false, source = "wild") {
+      const playerLevel = state.player.level;
+      let attack = 5;
+      let defense = 2;
+
+      for (let level = 2; level <= playerLevel; level += 1) {
+        attack += rand(1, 4);
+        defense += rand(1, 4);
+      }
+
+      let maxHp = 14 + playerLevel * 5 + rand(0, playerLevel * 3);
+
+      if (strong) {
+        maxHp = Math.ceil(maxHp * 1.35);
+        attack += 2;
+        defense += 1;
+      }
+
+      return {
+        name: monsterNames[rand(0, monsterNames.length - 1)],
+        maxHp,
+        hp: maxHp,
+        attack,
+        defense,
+        strong,
+        source
+      };
+    }
+
+    function startCombat(strong = false, source = "wild") {
+      if (hasActiveCombat()) {
+        state.activeScreen = "combat";
+        render();
+        return;
+      }
+
+      const monster = generateMonster(strong, source);
+      state.currentMonster = monster;
+      state.combatLogs = [];
+      addCombatLog(`${monster.strong ? "强敌" : "敌人"} ${monster.name} 从阴影中逼近。`);
+      state.activeScreen = "combat";
+      render();
+    }
+
+    function playerAttack() {
+      const monster = state.currentMonster;
+
+      if (state.activeScreen !== "combat" || !monster || monster.hp <= 0) {
+        addCombatLog("战斗已经结束。");
+        render();
+        return;
+      }
+
+      const damage = calculateDamage(state.player.attack, monster.defense);
+      monster.hp = Math.max(0, monster.hp - damage);
+      audioController.playSfx("playerAttack");
+      addCombatLog(`你攻击 ${monster.name}，造成 ${damage} 点伤害。`);
+
+      if (monster.hp <= 0) {
+        finishVictory();
+        return;
+      }
+
+      monsterAttack();
+      render();
+    }
+
+    function monsterAttack() {
+      const monster = state.currentMonster;
+
+      if (!monster || monster.hp <= 0) {
+        return;
+      }
+
+      const damage = calculateDamage(monster.attack, state.player.defense);
+      state.player.hp = Math.max(0, state.player.hp - damage);
+      audioController.playSfx("monsterAttack");
+      audioController.playSfx("playerHit");
+      addCombatLog(`${monster.name} 反击，造成 ${damage} 点伤害。`);
+
+      if (state.player.hp <= 0) {
+        handleDefeat();
+      }
+    }
+
+    function finishVictory() {
+      const monster = state.currentMonster;
+
+      if (!monster) {
+        return;
+      }
+
+      const multiplier = monster.strong ? 1.5 : 1;
+      const expReward = Math.ceil(rand(2, 10) * multiplier);
+      const goldReward = Math.ceil(rand(5, 20) * multiplier);
+      state.player.exp += expReward;
+      state.player.gold += goldReward;
+      audioController.playSfx("victory");
+      audioController.playSfx("gold");
+
+      addCombatLog(`你击败了 ${monster.name}，获得 ${expReward} 经验和 ${goldReward} 金币。`);
+      addLog(`战斗胜利：击败 ${monster.name}，获得 ${expReward} 经验和 ${goldReward} 金币。`);
+      state.currentMonster = null;
+      advanceStory(`你从战斗余烬中辨认出通往${currentStage().name}深处的新痕迹。`);
+      checkLevelUps();
+      state.activeScreen = "adventure";
+      render();
+    }
+
+    function handleDefeat() {
+      const monster = state.currentMonster;
+      const lostGold = Math.min(state.player.gold, rand(3, 10));
+      state.player.gold -= lostGold;
+      state.player.hp = 1;
+      audioController.playSfx("defeat");
+      addCombatLog(`你被${monster ? monster.name : "敌人"}击倒，失去 ${lostGold} 金币后勉强逃回安全处。`);
+      addLog(`战斗失败：你失去 ${lostGold} 金币，生命值降至 1。`);
+      state.currentMonster = null;
+      state.activeScreen = "adventure";
+    }
+
+    function tryFlee() {
+      const monster = state.currentMonster;
+
+      if (!monster) {
+        addCombatLog("没有敌人阻拦你。");
+        state.activeScreen = "adventure";
+        render();
+        return;
+      }
+
+      if (rand(1, 100) <= 60) {
+        addCombatLog(`你摆脱了 ${monster.name}，撤回安全路线。`);
+        addLog("你选择撤退，保住了继续探索的机会。");
+        audioController.playSfx("flee");
+        state.currentMonster = null;
+        state.activeScreen = "adventure";
+        render();
+        return;
+      }
+
+      addCombatLog("逃跑失败，敌人抓住破绽追击。");
+      monsterAttack();
+      render();
+    }
+
+    function checkLevelUps() {
+      const { player } = state;
+
+      while (player.level < MAX_LEVEL && player.exp >= nextLevelExp(player.level)) {
+        const neededExp = nextLevelExp(player.level);
+        player.exp -= neededExp;
+        player.level += 1;
+
+        const attackIncrease = rand(1, 3);
+        const defenseIncrease = rand(1, 2);
+        const hpIncrease = rand(2, 5);
+        player.attack += attackIncrease;
+        player.defense += defenseIncrease;
+        player.maxHp += hpIncrease;
+
+        const restoredHp = Math.min(player.maxHp - player.hp, Math.ceil(hpIncrease * 0.5) + 4);
+        player.hp += restoredHp;
+        audioController.playSfx("levelUp");
+        addLog(`升级到 ${player.level} 级：攻击 +${attackIncrease}，防御 +${defenseIncrease}，生命上限 +${hpIncrease}，恢复 ${restoredHp} 点生命。`);
+      }
+
+      if (player.level >= MAX_LEVEL) {
+        player.exp = 0;
+      }
+    }
+
+    function buyPotion() {
+      const { player } = state;
+
+      if (player.gold < POTION_PRICE) {
+        addLog(`金币不足：黑烛药剂需要 ${POTION_PRICE} 金币。`);
+        render();
+        return;
+      }
+
+      player.gold -= POTION_PRICE;
+      player.potions += 1;
+      audioController.playSfx("purchase");
+      addLog(`购买黑烛药剂，花费 ${POTION_PRICE} 金币。`);
+      render();
+    }
+
+    function usePotion(context = "inventory") {
+      const { player } = state;
+
+      if (context !== "inventory" && context !== "combat") {
+        addLog("无法使用药品：无效的使用方式。");
+        render();
+        return;
+      }
+
+      if (context === "combat" && (state.activeScreen !== "combat" || !hasActiveCombat())) {
+        addLog("当前没有进行中的战斗，无法使用战斗药品操作。");
+        render();
+        return;
+      }
+
+      if (context === "inventory" && hasActiveCombat()) {
+        state.activeScreen = "combat";
+        addCombatLog("战斗尚未结束，请使用战斗界面的“使用药品”操作。");
+        render();
+        return;
+      }
+
+      const log = context === "combat" ? addCombatLog : addLog;
+
+      if (player.potions <= 0) {
+        log("背包里没有黑烛药剂。");
+        render();
+        return;
+      }
+
+      if (player.hp >= player.maxHp) {
+        log("生命值已满，没有消耗药剂。");
+        render();
+        return;
+      }
+
+      const healed = Math.min(rand(POTION_HEAL.min, POTION_HEAL.max), player.maxHp - player.hp);
+      player.hp += healed;
+      player.potions -= 1;
+      audioController.playSfx("potion");
+      log(`使用黑烛药剂，恢复 ${healed} 点生命值。`);
+
+      if (context === "combat" && hasActiveCombat()) {
+        monsterAttack();
+      }
+
+      render();
+    }
+
+    function renderStatBar() {
+      const { player } = state;
+
+      return `
+        <div class="quick-stats" aria-label="${escapeHtml(t("stats.characterStatus"))}">
+          <div class="stat"><span>${escapeHtml(t("stats.level"))}</span><strong>${player.level}</strong></div>
+          <div class="stat"><span>${escapeHtml(t("stats.hp"))}</span><strong>${player.hp} / ${player.maxHp}</strong></div>
+          <div class="stat"><span>${escapeHtml(t("stats.exp"))}</span><strong>${experienceText()}</strong></div>
+          <div class="stat"><span>${escapeHtml(t("stats.gold"))}</span><strong>${player.gold}</strong></div>
+          <div class="stat"><span>${escapeHtml(t("stats.potions"))}</span><strong>${player.potions}</strong></div>
+        </div>
+      `;
+    }
+
+    function renderSpeakerIcon(muted) {
+      if (muted) {
+        return `
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" stroke-width="2" stroke-linejoin="round"/>
+            <path d="m18 9-4 6M14 9l4 6" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M16 8c1.3 1.1 2 2.5 2 4s-.7 2.9-2 4" stroke-width="2" stroke-linecap="round"/>
+          <path d="M19 5c2 1.9 3 4.2 3 7s-1 5.1-3 7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
+
+    function renderAudioControls() {
+      const settings = audioController.getSettings();
+      const label = settings.muted ? t("audio.unmute") : t("audio.mute");
+
+      return `
+        <div class="audio-controls" aria-label="${escapeHtml(t("audio.controls"))}">
+          <button class="audio-toggle" type="button" onclick="audioController.toggleMute()" aria-pressed="${settings.muted}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">
+            ${renderSpeakerIcon(settings.muted)}
+          </button>
+          <label class="audio-slider">
+            ${escapeHtml(t("audio.music"))}
+            <input type="range" min="0" max="1" step="0.05" value="${settings.musicVolume}" aria-label="${escapeHtml(t("audio.musicVolume"))}" oninput="audioController.setMusicVolume(this.value)">
+          </label>
+          <label class="audio-slider">
+            ${escapeHtml(t("audio.sfx"))}
+            <input type="range" min="0" max="1" step="0.05" value="${settings.sfxVolume}" aria-label="${escapeHtml(t("audio.sfxVolume"))}" oninput="audioController.setSfxVolume(this.value)">
+          </label>
+        </div>
+      `;
+    }
+
+    function renderLanguageControls() {
+      const options = Object.keys(LANGUAGES).map((language) => {
+        const selected = currentLanguage === language ? " selected" : "";
+        const labelKey = language === "zhHant" ? "languageZhHant" : "languageEn";
+        return `<option value="${escapeHtml(language)}"${selected}>${escapeHtml(t(labelKey))}</option>`;
+      }).join("");
+
+      return `
+        <label class="language-control">
+          <span>${escapeHtml(t("language"))}</span>
+          <select data-language-select data-focus-key="language" aria-label="${escapeHtml(t("language"))}" onchange="setLanguage(this.value)">
+            ${options}
+          </select>
+        </label>
+      `;
+    }
+
+    function renderNav() {
+      const navButton = (screen) => {
+        const current = state.activeScreen === screen ? ' aria-current="page"' : "";
+        const disabled = hasActiveCombat() && screen !== "combat" ? " disabled" : "";
+        return `<button type="button" onclick="setScreen('${screen}')"${current}${disabled}>${escapeHtml(t(SCREENS[screen]))}</button>`;
+      };
+
+      return `
+        <nav class="nav" aria-label="${escapeHtml(t("screens.main"))}">
+          ${navButton("main")}
+          ${navButton("adventure")}
+          ${navButton("shop")}
+          ${navButton("profile")}
+          ${navButton("inventory")}
+        </nav>
+      `;
+    }
+
+    function renderLogs() {
+      return `
+        <aside class="log-panel">
+          <h2>${escapeHtml(t("common.logs"))}</h2>
+          <div class="log-list" role="log" aria-live="polite" aria-relevant="additions text">
+            ${state.logs.map((entry) => `<p>${escapeHtml(entry)}</p>`).join("")}
+          </div>
+        </aside>
+      `;
+    }
+
+    function renderMain() {
+      return `
+        <section class="panel">
+          <h2>${escapeHtml(t(SCREENS.main))}</h2>
+          ${renderSceneStage({
+            scene: currentSceneAsset(),
+            location: currentStage().name,
+            status: state.story.status
+          })}
+          <p class="muted">${escapeHtml(t("main.placeholder"))}</p>
+          <div class="guide">
+            ${escapeHtml(t("main.guide"))}
+          </div>
+          <div class="actions">
+            <button type="button" onclick="setScreen('adventure')">${escapeHtml(t("actions.startAdventure"))}</button>
+            <button type="button" onclick="setScreen('shop')">${escapeHtml(t("actions.goShop"))}</button>
+            <button type="button" onclick="setScreen('profile')">${escapeHtml(t("actions.viewProfile"))}</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderAdventure() {
+      const stage = currentStage();
+
+      return `
+        <section class="panel">
+          <h2>${stage.name}</h2>
+          ${renderSceneStage({
+            scene: currentSceneAsset(),
+            location: stage.name,
+            status: state.story.status
+          })}
+          <p>${stage.description}</p>
+          <div class="info-grid">
+            <div><strong>${escapeHtml(t("common.progressedEvents"))}</strong><br>${escapeHtml(t("common.eventCount", { count: state.story.progress }))}</div>
+            <div><strong>${escapeHtml(t("common.currentStatus"))}</strong><br>${escapeHtml(state.story.status)}</div>
+          </div>
+          <div class="actions">
+            <button type="button" onclick="handleAdventureChoice('forest')">${escapeHtml(t("actions.enterForest"))}</button>
+            <button type="button" onclick="handleAdventureChoice('cave')" ${state.story.stage < 1 ? "disabled" : ""}>${escapeHtml(t("actions.exploreCave"))}</button>
+            <button type="button" onclick="handleAdventureChoice('village')">${escapeHtml(t("actions.goVillage"))}</button>
+            <button type="button" onclick="handleAdventureChoice('challenge')">${escapeHtml(t("actions.challengeMonster"))}</button>
+            <button type="button" onclick="handleAdventureChoice('rest')">${escapeHtml(t("actions.rest"))}</button>
+            <button type="button" onclick="handleAdventureChoice('deep')" ${state.story.stage < 2 ? "disabled" : ""}>${escapeHtml(t("actions.goDeeper"))}</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCombat() {
+      const { player } = state;
+      const monster = state.currentMonster;
+      const potionDisabled = player.potions <= 0 || player.hp >= player.maxHp ? " disabled" : "";
+
+      if (!monster) {
+        return `
+          <section class="panel">
+            <h2>${escapeHtml(t("combat.heading"))}</h2>
+            <p class="muted">${escapeHtml(t("combat.noEnemy"))}</p>
+            <div class="actions">
+              <button type="button" onclick="setScreen('adventure')">${escapeHtml(t("actions.returnAdventure"))}</button>
+            </div>
+            <h3>${escapeHtml(t("combat.logHeading"))}</h3>
+            <div class="combat-log" role="log" aria-live="polite">
+              ${state.combatLogs.length ? state.combatLogs.map((entry) => `<p>${escapeHtml(entry)}</p>`).join("") : `<p>${escapeHtml(t("common.noCombatRecords"))}</p>`}
+            </div>
+          </section>
+        `;
+      }
+
+      return `
+        <section class="panel">
+          <h2>${escapeHtml(t("combat.heading"))}</h2>
+          ${renderSceneStage({
+            scene: currentSceneAsset(),
+            location: currentStage().name,
+            status: t("combat.status"),
+            monster
+          })}
+          <div class="combat-grid">
+            <div class="combatant">
+              <h3>${escapeHtml(t("combat.player"))}</h3>
+              <p>${escapeHtml(t("combat.hp", { hp: player.hp, maxHp: player.maxHp }))}</p>
+              ${meter(player.hp, player.maxHp)}
+              <p>${escapeHtml(t("combat.attack", { attack: player.attack }))}</p>
+              <p>${escapeHtml(t("combat.defense", { defense: player.defense }))}</p>
+            </div>
+            <div class="combatant danger">
+              <h3${monster.strong ? ` aria-label="${escapeHtml(`${monster.name}（${t("common.strongEnemy")}）`)}"` : ""}>${escapeHtml(monster.name)}</h3>
+              <p>${escapeHtml(t("combat.enemyHp", { hp: monster.hp, maxHp: monster.maxHp }))}</p>
+              ${meter(monster.hp, monster.maxHp, "enemy")}
+              <p>${escapeHtml(t("combat.attack", { attack: monster.attack }))}</p>
+              <p>${escapeHtml(t("combat.defense", { defense: monster.defense }))}</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" onclick="playerAttack()">${escapeHtml(t("actions.attack"))}</button>
+            <button type="button" onclick="usePotion('combat')"${potionDisabled}>${escapeHtml(t("actions.usePotion"))}</button>
+            <button type="button" onclick="tryFlee()">${escapeHtml(t("actions.flee"))}</button>
+          </div>
+          <h3>${escapeHtml(t("combat.logHeading"))}</h3>
+          <div class="combat-log" role="log" aria-live="polite">
+            ${state.combatLogs.length ? state.combatLogs.map((entry) => `<p>${escapeHtml(entry)}</p>`).join("") : `<p>${escapeHtml(t("common.noCombatRecords"))}</p>`}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderShop() {
+      const cannotAfford = state.player.gold < POTION_PRICE;
+      const purchaseDisabled = cannotAfford ? " disabled" : "";
+
+      return `
+        <section class="panel">
+          <h2>${escapeHtml(t("shop.heading"))}</h2>
+          ${renderSceneStage({
+            scene: SHOP_SCENE_ASSET,
+            location: t("shop.location"),
+            status: t("shop.status")
+          })}
+          <p class="muted">${escapeHtml(t("shop.description"))}</p>
+          <div class="shop-card">
+            <div class="item-icon" data-visual="potion">${renderPotionImage("potion-art")}</div>
+            <div>
+              <h3>${escapeHtml(t("shop.potionName"))}</h3>
+              <p>${escapeHtml(t("shop.price", { price: POTION_PRICE }))}</p>
+              <p>${escapeHtml(t("shop.healRange", { min: POTION_HEAL.min, max: POTION_HEAL.max }))}</p>
+              <p class="muted">${escapeHtml(t("shop.healCap"))}</p>
+              ${cannotAfford ? `<p class="muted">${escapeHtml(t("shop.cannotAffordInline", { price: POTION_PRICE }))}</p>` : ""}
+            </div>
+            <div class="actions">
+              <button type="button" onclick="buyPotion()"${purchaseDisabled}>${escapeHtml(t("actions.buy"))}</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderProfile() {
+      const { player, story } = state;
+
+      return `
+        <section class="panel">
+          <h2>${escapeHtml(t(SCREENS.profile))}</h2>
+          ${renderSceneStage({
+            scene: currentSceneAsset(),
+            location: currentStage().name,
+            status: story.status,
+            compact: true
+          })}
+          <div class="info-grid">
+            <div><strong>${escapeHtml(t("profile.labels.level"))}</strong><br>${player.level} / ${player.maxLevel}</div>
+            <div><strong>${escapeHtml(t("profile.labels.exp"))}</strong><br>${player.exp}</div>
+            <div><strong>${escapeHtml(t("profile.labels.nextExp"))}</strong><br>${player.level >= MAX_LEVEL ? escapeHtml(t("profile.maxLevel")) : nextLevelExp()}</div>
+            <div><strong>${escapeHtml(t("profile.labels.hp"))}</strong><br>${player.hp} / ${player.maxHp}</div>
+            <div><strong>${escapeHtml(t("profile.labels.attack"))}</strong><br>${player.attack}</div>
+            <div><strong>${escapeHtml(t("profile.labels.defense"))}</strong><br>${player.defense}</div>
+            <div><strong>${escapeHtml(t("profile.labels.gold"))}</strong><br>${player.gold}</div>
+            <div><strong>${escapeHtml(t("profile.labels.potions"))}</strong><br>${player.potions}</div>
+            <div><strong>${escapeHtml(t("profile.labels.status"))}</strong><br>${escapeHtml(story.status)}</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderInventory() {
+      const { player: p } = state;
+      const disabled = p.potions <= 0 || p.hp >= p.maxHp ? " disabled" : "";
+
+      return `
+        <section class="panel">
+          <h2>${escapeHtml(t("inventory.heading"))}</h2>
+          <div class="shop-card">
+            <div class="item-icon" data-visual="potion">${renderPotionImage("potion-art")}</div>
+            <div>
+              <h3>${escapeHtml(t("inventory.potionCount", { count: p.potions }))}</h3>
+              <p>${escapeHtml(t("inventory.healRange", { min: POTION_HEAL.min, max: POTION_HEAL.max }))}</p>
+              <p class="muted">${escapeHtml(t("inventory.currentHp", { hp: p.hp, maxHp: p.maxHp }))}</p>
+            </div>
+            <div class="actions">
+              <button type="button" onclick="usePotion('inventory')"${disabled}>${escapeHtml(t("actions.usePotion"))}</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderActiveScreen() {
+      if (state.activeScreen === "adventure") {
+        return renderAdventure();
+      }
+
+      if (state.activeScreen === "combat") {
+        return renderCombat();
+      }
+
+      if (state.activeScreen === "shop") {
+        return renderShop();
+      }
+
+      if (state.activeScreen === "profile") {
+        return renderProfile();
+      }
+
+      if (state.activeScreen === "inventory") {
+        return renderInventory();
+      }
+
+      return renderMain();
+    }
+
+    function render() {
+      const activeControl = app.contains(document.activeElement) && ["BUTTON", "INPUT", "SELECT"].includes(document.activeElement.tagName)
+        ? document.activeElement
+        : null;
+      const focusKey = activeControl ? controlFocusKey(activeControl) : "";
+      document.title = `${t("gameTitle")} | RPG`;
+
+      app.innerHTML = `
+        <header class="topbar">
+          <div class="brand">
+            <div class="brand-row">
+              <svg class="black-candle-sigil" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                <path d="M32 6 45 18 58 20 50 32 53 48 38 45 32 58 26 45 11 48 14 32 6 20 19 18Z" fill="#070605" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M32 14c4 5 3 8 0 11-3-3-4-6 0-11Z" fill="#d6a84f"/>
+                <path d="M25 26h14v18H25z" fill="#0e0b09" stroke="#6f8760" stroke-width="2"/>
+                <path d="M23 46h18M28 30h8M32 26v20" stroke="#7e91a0" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <h1>${escapeHtml(t("gameTitle"))}</h1>
+            </div>
+            <p>${escapeHtml(t("gameSubtitle"))}</p>
+          </div>
+          <div class="topbar-tools">
+            ${renderLanguageControls()}
+            ${renderAudioControls()}
+            ${renderStatBar()}
+          </div>
+        </header>
+        ${renderNav()}
+        <main class="layout">
+          ${renderActiveScreen()}
+          ${renderLogs()}
+        </main>
+      `;
+
+      if (focusKey) {
+        const focusTarget = Array.from(app.querySelectorAll("button, input, select"))
+          .find((control) => controlFocusKey(control) === focusKey);
+
+        if (focusTarget && !focusTarget.disabled) {
+          focusTarget.focus();
+        } else {
+          const screenHeading = app.querySelector(".panel h2");
+
+          if (screenHeading) {
+            screenHeading.tabIndex = -1;
+            screenHeading.focus();
+          }
+        }
+      }
+
+      updateGameAnnouncer();
+      audioController.syncBgm();
+    }
+
+    app.addEventListener("click", (event) => {
+      if (event.target.closest("button, input, select")) {
+        audioController.unlock();
+      }
+    });
+
+    app.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.key === " ") && event.target.closest("button, input, select")) {
+        audioController.unlock();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
