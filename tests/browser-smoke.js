@@ -18,8 +18,8 @@ async function state(page) {
     story: { ...state.story },
     screen: state.activeScreen,
     monster: state.currentMonster ? { ...state.currentMonster } : null,
-    combatLogs: [...state.combatLogs],
-    logs: [...state.logs]
+    combatLogs: state.combatLogs.map(formatLogEntry),
+    logs: state.logs.map(formatLogEntry)
   }));
 }
 
@@ -99,6 +99,92 @@ async function resetAudioProbe(page) {
   assert(languageApi.language === "zhHant", "default language state is not Traditional Chinese");
   assert(languageApi.htmlLang === "zh-Hant", "document language is not zh-Hant by default");
   assert(languageApi.selectorValue === "zhHant", "language selector does not default to Traditional Chinese");
+
+  await page.evaluate(() => {
+    state.player.hp = state.player.maxHp;
+    startCombat(false, "language-switch");
+  });
+  await page.getByLabel("語言").selectOption("en");
+  await page.getByRole("heading", { name: "Black Candle Dungeon" }).waitFor();
+  assert(await page.getByText("New player guide", { exact: false }).isVisible(), "existing story log did not re-localize to English");
+  assert(await page.getByText("advances from the shadows", { exact: false }).isVisible(), "existing combat log did not re-localize to English");
+  await page.evaluate(() => {
+    state.currentMonster = null;
+    state.combatLogs = [];
+    state.activeScreen = "main";
+    render();
+  });
+  await page.evaluate(() => {
+    currentLanguage = "zhHant";
+    document.documentElement.lang = "zh-Hant";
+    state.story.stage = 3;
+    state.story.progress = 0;
+    advanceStory("煙測推進洞穴入口。");
+    render();
+  });
+  assert(await page.locator(".log-panel").getByText("煙測推進洞穴入口。", { exact: false }).isVisible(), "literal legacy story log was not preserved");
+  assert(!(await page.locator(".log-panel").getByText("logs.煙測推進洞穴入口。", { exact: false }).isVisible()), "literal legacy story log rendered as a missing translation key");
+  await page.getByLabel("語言").selectOption("en");
+  assert(await page.locator(".log-panel").getByText("煙測推進洞穴入口。", { exact: false }).isVisible(), "literal legacy story log should remain literal after language switch");
+  let englishLanguageApi = await page.evaluate(() => ({
+    language: typeof currentLanguage === "string" ? currentLanguage : null,
+    htmlLang: document.documentElement.lang,
+    selectorValue: document.querySelector("[data-language-select]")?.value || null
+  }));
+  assert(englishLanguageApi.language === "en", "language state did not switch to English");
+  assert(englishLanguageApi.htmlLang === "en", "document language did not switch to en");
+  assert(englishLanguageApi.selectorValue === "en", "language selector did not switch to English");
+  for (const label of ["Adventure", "Shop", "Profile", "Inventory"]) {
+    assert(await page.getByRole("button", { name: label, exact: true }).isVisible(), `English nav button missing: ${label}`);
+  }
+  await page.getByRole("button", { name: "Shop", exact: true }).click();
+  assert(await page.getByRole("heading", { name: /^(Shop|Shop Interface)$/ }).isVisible(), "English shop did not open");
+  assert(await page.getByText("Black Candle Potion", { exact: false }).isVisible(), "English shop potion is missing");
+  await page.getByRole("button", { name: "Inventory", exact: true }).click();
+  assert(await page.getByRole("heading", { name: "Inventory or item use" }).isVisible(), "English inventory did not open");
+  assert(await page.getByRole("button", { name: "Use potion" }).isDisabled(), "English full-HP inventory potion should be disabled");
+  await page.evaluate(() => {
+    state.player.hp = state.player.maxHp;
+    state.player.potions = 1;
+    startCombat(false, "smoke");
+  });
+  assert(await page.getByRole("heading", { name: "Combat", exact: true }).isVisible(), "English combat did not open");
+  assert(await page.getByRole("button", { name: "Attack", exact: true }).isVisible(), "English attack button is missing");
+  await page.getByRole("button", { name: "Attack", exact: true }).click();
+  const englishCombatLogs = await page.evaluate(() => state.combatLogs.map(formatLogEntry));
+  const englishAttackIndex = englishCombatLogs.findIndex(item => item.startsWith("You attack"));
+  const englishCounterIndex = englishCombatLogs.findIndex(item => item.includes("counters"));
+  assert(englishAttackIndex >= 0 && englishCounterIndex > englishAttackIndex, "English combat log is not chronological");
+  assert(await page.getByLabel("Music volume").isVisible(), "English music volume label is missing");
+  assert(await page.getByLabel("SFX volume").isVisible(), "English SFX volume label is missing");
+  assert(await page.getByRole("button", { name: /^(Mute|Unmute)$/ }).isVisible(), "English mute control label is missing");
+
+  await page.reload();
+  await page.waitForLoadState("load");
+  await page.getByRole("heading", { name: "Black Candle Dungeon" }).waitFor();
+  englishLanguageApi = await page.evaluate(() => ({
+    htmlLang: document.documentElement.lang,
+    selectorValue: document.querySelector("[data-language-select]")?.value || null
+  }));
+  assert(englishLanguageApi.htmlLang === "en", "English document language did not persist after reload");
+  assert(englishLanguageApi.selectorValue === "en", "English selector value did not persist after reload");
+
+  await page.evaluate(() => localStorage.setItem("black-candle-language-v1", "not-a-language"));
+  await page.reload();
+  await page.waitForLoadState("load");
+  await page.getByRole("heading", { name: "黑燭地牢" }).waitFor();
+  const fallbackLanguageApi = await page.evaluate(() => ({
+    htmlLang: document.documentElement.lang,
+    selectorValue: document.querySelector("[data-language-select]")?.value || null
+  }));
+  assert(fallbackLanguageApi.htmlLang === "zh-Hant", "invalid language did not fall back to zh-Hant document language");
+  assert(fallbackLanguageApi.selectorValue === "zhHant", "invalid language did not fall back to Traditional Chinese selector value");
+
+  await page.evaluate(() => localStorage.setItem("black-candle-language-v1", "zhHant"));
+  await page.reload();
+  await page.waitForLoadState("load");
+  await page.getByRole("heading", { name: "黑燭地牢" }).waitFor();
+
   const visualApi = await page.evaluate(() => ({
     scenes: Array.isArray(sceneAssets) ? sceneAssets.length : 0,
     monsters: monsterAssets && typeof monsterAssets === "object"
@@ -305,16 +391,16 @@ async function resetAudioProbe(page) {
     state.activeScreen = "combat";
     render();
   });
-  await page.waitForFunction(() => state.logs.some(entry => entry.includes("音訊播放受限")));
+  await page.waitForFunction(() => state.logs.map(formatLogEntry).some(entry => entry.includes("音訊播放受限")));
   await page.evaluate(() => audioController.playSfx("potion"));
-  await page.waitForFunction(() => state.logs.filter(entry => entry.includes("音訊播放受限")).length >= 2);
+  await page.waitForFunction(() => state.logs.map(formatLogEntry).filter(entry => entry.includes("音訊播放受限")).length >= 2);
   await page.evaluate(() => {
     audioController.syncBgm();
     audioController.playSfx("potion");
   });
   await page.waitForTimeout(50);
   const failureState = await page.evaluate(() => ({
-    failureLogs: state.logs.filter(entry => entry.includes("音訊播放受限")).length,
+    failureLogs: state.logs.map(formatLogEntry).filter(entry => entry.includes("音訊播放受限")).length,
     debug: audioController.getDebugState()
   }));
   assert(failureState.failureLogs === 2, `audio failures were not deduplicated: ${JSON.stringify(failureState)}`);

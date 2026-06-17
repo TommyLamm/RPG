@@ -741,7 +741,7 @@
     const MAX_LEVEL = 100;
     const POTION_PRICE = 15;
     const POTION_HEAL = { min: 5, max: 18 };
-    const monsterNames = ["史莱姆", "哥布林", "骷髅兵", "野狼", "暗影兽", "腐肉守卫", "墓穴猎手", "黑烛信徒"];
+    const monsterIds = ["slime", "goblin", "skeleton", "wolf", "shadowBeast", "fleshGuard", "tombHunter", "blackCandleCultist"];
     const sceneAssets = [
       "assets/images/scene-ash-village.webp",
       "assets/images/scene-rotten-forest.webp",
@@ -749,14 +749,38 @@
       "assets/images/scene-old-king-tomb.webp"
     ];
     const monsterAssets = {
-      "史莱姆": "assets/images/monster-slime.webp",
-      "哥布林": "assets/images/monster-goblin.webp",
-      "骷髅兵": "assets/images/monster-skeleton.webp",
-      "野狼": "assets/images/monster-wolf.webp",
-      "暗影兽": "assets/images/monster-shadow-beast.webp",
-      "腐肉守卫": "assets/images/monster-flesh-guard.webp",
-      "墓穴猎手": "assets/images/monster-tomb-hunter.webp",
-      "黑烛信徒": "assets/images/monster-black-candle-cultist.webp"
+      slime: "assets/images/monster-slime.webp",
+      goblin: "assets/images/monster-goblin.webp",
+      skeleton: "assets/images/monster-skeleton.webp",
+      wolf: "assets/images/monster-wolf.webp",
+      shadowBeast: "assets/images/monster-shadow-beast.webp",
+      fleshGuard: "assets/images/monster-flesh-guard.webp",
+      tombHunter: "assets/images/monster-tomb-hunter.webp",
+      blackCandleCultist: "assets/images/monster-black-candle-cultist.webp"
+    };
+    const legacyMonsterNameIds = {
+      "史莱姆": "slime",
+      "史萊姆": "slime",
+      Slime: "slime",
+      "哥布林": "goblin",
+      Goblin: "goblin",
+      "骷髅兵": "skeleton",
+      "骷髏兵": "skeleton",
+      Skeleton: "skeleton",
+      "野狼": "wolf",
+      Wolf: "wolf",
+      "暗影兽": "shadowBeast",
+      "暗影獸": "shadowBeast",
+      "Shadow Beast": "shadowBeast",
+      "腐肉守卫": "fleshGuard",
+      "腐肉守衛": "fleshGuard",
+      "Flesh Guard": "fleshGuard",
+      "墓穴猎手": "tombHunter",
+      "墓穴獵手": "tombHunter",
+      "Tomb Hunter": "tombHunter",
+      "黑烛信徒": "blackCandleCultist",
+      "黑燭信徒": "blackCandleCultist",
+      "Black Candle Cultist": "blackCandleCultist"
     };
     const SHOP_SCENE_ASSET = "assets/images/scene-black-candle-shop.webp";
     const POTION_ASSET = "assets/images/item-black-candle-potion.webp";
@@ -828,7 +852,95 @@
           currentStatus: "當前狀態",
           progressedEvents: "已推進事件",
           strongEnemy: "強敵",
-          eventCount: "{count} 次"
+          eventCount: "{count} 次",
+          unknownArea: "未知區域"
+        },
+        monsters: {
+          slime: "史萊姆",
+          goblin: "哥布林",
+          skeleton: "骷髏兵",
+          wolf: "野狼",
+          shadowBeast: "暗影獸",
+          fleshGuard: "腐肉守衛",
+          tombHunter: "墓穴獵手",
+          blackCandleCultist: "黑燭信徒"
+        },
+        stages: {
+          ashVillage: {
+            name: "灰燼村入口",
+            description: "塌陷的木門半掩著，黑蠟沿門縫凝成冷硬的痕跡。",
+            status: "灰燼村入口"
+          },
+          rottenForest: {
+            name: "腐爛森林",
+            description: "腐葉與霧氣覆蓋小徑，枯枝深處偶爾傳來拖行聲。",
+            status: "腐爛森林"
+          },
+          dampCave: {
+            name: "潮濕洞穴",
+            description: "水滴敲在石面上，回聲像有人在更深處低語。",
+            status: "潮濕洞穴"
+          },
+          oldKingsTomb: {
+            name: "舊王墓穴",
+            description: "石棺環繞著熄滅的祭台，墓壁上的王冠紋章仍有餘溫。",
+            status: "舊王墓穴"
+          }
+        },
+        logs: {
+          initialGuide: "新手指南：先從主介面進入劇情冒險，熟悉村口、森林與洞穴的危險。",
+          audioFailure: "音訊播放受限：瀏覽器拒絕了一個聲音資源，遊戲仍可繼續。",
+          unlockForest: "腐爛森林的霧牆散開，村外舊路終於露出輪廓。",
+          unlockCave: "潮濕洞穴傳來空洞回聲，黑蠟痕跡一路延伸到地下。",
+          unlockTomb: "舊王墓穴的石門緩緩錯開，冷風捲著殘燭氣味撲面而來。",
+          gainGold: "{reason}獲得 {amount} 金幣。",
+          gainPotion: "{reason}你找到了一瓶治療藥劑。",
+          restFullHp: "你在村口短暫歇腳，但生命值已滿，無需治療。",
+          restRecover: "你靠著餘燼休息片刻，恢復 {amount} 點生命。",
+          forestForcedCombat: "第一隻腐枝怪從霧裡撲出，通往森林的路必須用武器打開。",
+          caveBlocked: "洞穴入口被腐藤和黑蠟封住，先調查森林才能找到入口。",
+          deepBlocked: "更深處的石階沉在積水下，缺少洞穴線索前無法繼續。",
+          villageOldMan: "村井邊的老人低聲提醒你：森林裡的燭影會跟著活人移動。",
+          specialKingMark: "特殊劇情：你從墓紋碎片裡拼出舊王印記的一角。",
+          specialCaveCipher: "特殊劇情：你記下黑蠟祭祀留下的洞穴暗號。",
+          distantBell: "你聽見遠處鐘聲倒響，像是有人在催促你繼續前進。",
+          combatTrace: "你從戰鬥餘燼中辨認出通往{stageName}深處的新痕跡。",
+          victory: "戰鬥勝利：擊敗 {monsterName}，獲得 {exp} 經驗和 {gold} 金幣。",
+          defeat: "戰鬥失敗：你失去 {gold} 金幣，生命值降至 1。",
+          fleeSuccess: "你選擇撤退，保住了繼續探索的機會。",
+          levelUp: "升級到 {level} 級：攻擊 +{attack}，防禦 +{defense}，生命上限 +{hp}，恢復 {restoredHp} 點生命。",
+          purchaseFailure: "金幣不足：黑燭藥劑需要 {price} 金幣。",
+          purchaseSuccess: "購買黑燭藥劑，花費 {price} 金幣。",
+          invalidPotionContext: "無法使用藥品：無效的使用方式。",
+          noActiveCombatPotion: "當前沒有進行中的戰鬥，無法使用戰鬥藥品操作。",
+          noPotion: "背包裡沒有黑燭藥劑。",
+          hpFullNoPotion: "生命值已滿，沒有消耗藥劑。",
+          usePotion: "使用黑燭藥劑，恢復 {amount} 點生命值。"
+        },
+        logReasons: {
+          villageWax: "你幫村民清理封門黑蠟，",
+          oldCoinPurse: "你在裂開的石縫裡摸到舊錢袋，",
+          abandonedCabinet: "你在廢棄藥櫃裡翻找，",
+          driedBloodTrail: "你沿著乾涸血跡搜尋，"
+        },
+        combatLogs: {
+          combatLocked: "戰鬥尚未結束，只能攻擊、使用藥品或嘗試逃跑。",
+          combatStart: "{enemyType} {monsterName} 從陰影中逼近。",
+          enemy: "敵人",
+          strongEnemy: "強敵",
+          combatEnded: "戰鬥已經結束。",
+          playerAttack: "你攻擊 {monsterName}，造成 {damage} 點傷害。",
+          monsterCounter: "{monsterName} 反擊，造成 {damage} 點傷害。",
+          victory: "你擊敗了 {monsterName}，獲得 {exp} 經驗和 {gold} 金幣。",
+          defeat: "你被{monsterName}擊倒，失去 {gold} 金幣後勉強逃回安全處。",
+          unknownEnemy: "敵人",
+          noEnemy: "沒有敵人阻攔你。",
+          fleeSuccess: "你擺脫了 {monsterName}，撤回安全路線。",
+          fleeFail: "逃跑失敗，敵人抓住破綻追擊。",
+          inventoryBlockedByCombat: "戰鬥尚未結束，請使用戰鬥介面的「使用藥劑」操作。",
+          noPotion: "背包裡沒有黑燭藥劑。",
+          hpFullNoPotion: "生命值已滿，沒有消耗藥劑。",
+          usePotion: "使用黑燭藥劑，恢復 {amount} 點生命值。"
         },
         actions: {
           startAdventure: "開始冒險",
@@ -930,7 +1042,95 @@
           currentStatus: "Current status",
           progressedEvents: "Progressed events",
           strongEnemy: "Strong enemy",
-          eventCount: "{count} times"
+          eventCount: "{count} times",
+          unknownArea: "Unknown area"
+        },
+        monsters: {
+          slime: "Slime",
+          goblin: "Goblin",
+          skeleton: "Skeleton",
+          wolf: "Wolf",
+          shadowBeast: "Shadow Beast",
+          fleshGuard: "Flesh Guard",
+          tombHunter: "Tomb Hunter",
+          blackCandleCultist: "Black Candle Cultist"
+        },
+        stages: {
+          ashVillage: {
+            name: "Ashen Village Gate",
+            description: "A collapsed wooden gate hangs half shut, black wax hardened along its seams.",
+            status: "Ashen Village Gate"
+          },
+          rottenForest: {
+            name: "Rotten Forest",
+            description: "Rotting leaves and fog cover the path while something drags itself through the dead branches.",
+            status: "Rotten Forest"
+          },
+          dampCave: {
+            name: "Damp Cave",
+            description: "Water taps against stone, and every echo sounds like a whisper from deeper below.",
+            status: "Damp Cave"
+          },
+          oldKingsTomb: {
+            name: "Old King's Tomb",
+            description: "Stone coffins surround an extinguished altar, and crown marks on the wall still hold a trace of warmth.",
+            status: "Old King's Tomb"
+          }
+        },
+        logs: {
+          initialGuide: "New player guide: enter the story adventure first and learn the dangers around the village gate, forest, and cave.",
+          audioFailure: "Audio playback was limited: the browser rejected a sound resource, but the game can continue.",
+          unlockForest: "The fog wall around the Rotten Forest breaks apart, revealing the old road beyond the village.",
+          unlockCave: "A hollow echo rises from the Damp Cave as black wax marks lead underground.",
+          unlockTomb: "The stone door of the Old King's Tomb grinds open, carrying cold air and the smell of spent candles.",
+          gainGold: "{reason} gain {amount} gold.",
+          gainPotion: "{reason} find a healing potion.",
+          restFullHp: "You take a short rest at the village gate, but your HP is already full.",
+          restRecover: "You rest beside the embers for a moment and recover {amount} HP.",
+          forestForcedCombat: "The first rot-branch creature lunges from the fog; the path to the forest must be opened by force.",
+          caveBlocked: "Rotten vines and black wax seal the cave entrance. Investigate the forest first to find the way in.",
+          deepBlocked: "The deeper stone steps lie under standing water. You need more cave clues before you can continue.",
+          villageOldMan: "An old man beside the village well whispers that candle-shadows in the forest follow the living.",
+          specialKingMark: "Special discovery: you piece together part of the old king's sigil from a carved tomb fragment.",
+          specialCaveCipher: "Special discovery: you record the cave cipher left behind by the black-wax cult.",
+          distantBell: "You hear a distant bell ringing backward, as if someone is urging you onward.",
+          combatTrace: "In the ashes of battle, you spot a fresh trail leading deeper into {stageName}.",
+          victory: "Combat victory: defeated {monsterName}, gaining {exp} EXP and {gold} gold.",
+          defeat: "Combat defeat: you lose {gold} gold and your HP falls to 1.",
+          fleeSuccess: "You withdraw, preserving your chance to keep exploring.",
+          levelUp: "Leveled up to {level}: attack +{attack}, defense +{defense}, max HP +{hp}, recovered {restoredHp} HP.",
+          purchaseFailure: "Not enough gold: a Black Candle Potion costs {price} gold.",
+          purchaseSuccess: "Bought a Black Candle Potion for {price} gold.",
+          invalidPotionContext: "Cannot use a potion: invalid use context.",
+          noActiveCombatPotion: "There is no active combat, so combat potion use is unavailable.",
+          noPotion: "There are no Black Candle Potions in your bag.",
+          hpFullNoPotion: "HP is already full, so no potion was consumed.",
+          usePotion: "Used a Black Candle Potion and restored {amount} HP."
+        },
+        logReasons: {
+          villageWax: "You clear black wax from the sealed village gate and",
+          oldCoinPurse: "You find an old coin pouch in a cracked stone seam and",
+          abandonedCabinet: "You search an abandoned medicine cabinet and",
+          driedBloodTrail: "You follow a dried blood trail and"
+        },
+        combatLogs: {
+          combatLocked: "Combat is not over yet. You can only attack, use a potion, or try to flee.",
+          combatStart: "{enemyType} {monsterName} advances from the shadows.",
+          enemy: "Enemy",
+          strongEnemy: "Strong enemy",
+          combatEnded: "Combat has already ended.",
+          playerAttack: "You attack {monsterName}, dealing {damage} damage.",
+          monsterCounter: "{monsterName} counters, dealing {damage} damage.",
+          victory: "You defeated {monsterName}, gaining {exp} EXP and {gold} gold.",
+          defeat: "{monsterName} knocks you down. You lose {gold} gold and barely escape to safety.",
+          unknownEnemy: "Enemy",
+          noEnemy: "No enemy is blocking you.",
+          fleeSuccess: "You break away from {monsterName} and retreat to a safe route.",
+          fleeFail: "Fleeing fails, and the enemy catches the opening.",
+          inventoryBlockedByCombat: "Combat is not over yet. Use the combat screen's Use potion action.",
+          noPotion: "There are no Black Candle Potions in your bag.",
+          hpFullNoPotion: "HP is already full, so no potion was consumed.",
+          usePotion: "Used a Black Candle Potion and restored {amount} HP."
         },
         actions: {
           startAdventure: "Start adventure",
@@ -1008,23 +1208,25 @@
     };
 
     const stages = [
-      {
-        name: "灰烬村入口",
-        description: "塌陷的木门半掩着，黑蜡沿门缝凝成冷硬的痕迹。"
-      },
-      {
-        name: "腐烂森林",
-        description: "腐叶与雾气覆盖小径，枯枝深处偶尔传来拖行声。"
-      },
-      {
-        name: "潮湿洞穴",
-        description: "水滴敲在石面上，回声像有人在更深处低语。"
-      },
-      {
-        name: "旧王墓穴",
-        description: "石棺环绕着熄灭的祭台，墓壁上的王冠纹章仍有余温。"
-      }
+      { id: "ashVillage" },
+      { id: "rottenForest" },
+      { id: "dampCave" },
+      { id: "oldKingsTomb" }
     ];
+    const legacyStoryStatusKeys = {
+      "灰烬村入口": "ashVillage",
+      "灰燼村入口": "ashVillage",
+      "Ashen Village Gate": "ashVillage",
+      "腐烂森林": "rottenForest",
+      "腐爛森林": "rottenForest",
+      "Rotten Forest": "rottenForest",
+      "潮湿洞穴": "dampCave",
+      "潮濕洞穴": "dampCave",
+      "Damp Cave": "dampCave",
+      "旧王墓穴": "oldKingsTomb",
+      "舊王墓穴": "oldKingsTomb",
+      "Old King's Tomb": "oldKingsTomb"
+    };
 
     const state = {
       activeScreen: "main",
@@ -1042,12 +1244,13 @@
       story: {
         stage: 0,
         progress: 0,
-        status: "灰烬村入口",
+        statusKey: "ashVillage",
+        status: "灰燼村入口",
         clueFound: false,
         keyFragment: false
       },
       currentMonster: null,
-      logs: ["新手指南：先从主界面进入剧情冒险，熟悉村口、森林与洞穴的危险。"],
+      logs: [],
       combatLogs: []
     };
     let logRevision = 0;
@@ -1098,6 +1301,47 @@
       return interpolate(template, params);
     }
 
+    function translatedParam(key, params = {}) {
+      return { __translationKey: key, params };
+    }
+
+    function resolveLogParams(params = {}) {
+      return Object.fromEntries(Object.entries(params).map(([key, value]) => {
+        if (value && typeof value === "object" && value.__translationKey) {
+          return [key, t(value.__translationKey, resolveLogParams(value.params))];
+        }
+
+        return [key, value];
+      }));
+    }
+
+    function logEntry(key, params = {}) {
+      return { key, params };
+    }
+
+    function literalLogEntry(message) {
+      return { key: String(message || ""), params: {}, literal: true };
+    }
+
+    function formatLogEntry(entry) {
+      if (entry && typeof entry === "object" && entry.key) {
+        if (entry.literal) {
+          return String(entry.key);
+        }
+
+        return t(entry.key, resolveLogParams(entry.params));
+      }
+
+      return String(entry || "");
+    }
+
+    function monsterNameParam(monster) {
+      const monsterId = normalizeMonsterId(monster);
+      return monsterId ? translatedParam(`monsters.${monsterId}`) : monsterName(monster);
+    }
+
+    state.logs = [logEntry("logs.initialGuide")];
+
     function setLanguage(language) {
       currentLanguage = sanitizeLanguage(language);
       document.documentElement.lang = LANGUAGES[currentLanguage].htmlLang;
@@ -1146,26 +1390,65 @@
         .replaceAll("'", "&#039;");
     }
 
-    function currentStage() {
+    function currentStageIndex() {
       const rawStage = Number(state.story.stage);
       const safeStage = Number.isFinite(rawStage) ? Math.floor(rawStage) : 0;
-      const stageIndex = clamp(safeStage, 0, stages.length - 1);
-      return stages[stageIndex] || stages[0];
+      return clamp(safeStage, 0, stages.length - 1);
+    }
+
+    function currentStage() {
+      return stages[currentStageIndex()] || stages[0];
+    }
+
+    function stageText(stageIndex, field) {
+      const rawStage = Number(stageIndex);
+      const safeStage = Number.isFinite(rawStage) ? Math.floor(rawStage) : 0;
+      const stage = stages[clamp(safeStage, 0, stages.length - 1)] || stages[0];
+      return t(`stages.${stage.id}.${field}`);
+    }
+
+    function currentStoryStatus() {
+      const candidateStatusKey = state.story.statusKey || legacyStoryStatusKeys[state.story.status] || currentStage().id;
+      const statusKey = stages.some((stage) => stage.id === candidateStatusKey) ? candidateStatusKey : currentStage().id;
+      return t(`stages.${statusKey}.status`);
     }
 
     function currentSceneAsset() {
-      const rawStage = Number(state.story.stage);
-      const safeStage = Number.isFinite(rawStage) ? Math.floor(rawStage) : 0;
-      const stageIndex = clamp(safeStage, 0, sceneAssets.length - 1);
+      const stageIndex = clamp(currentStageIndex(), 0, sceneAssets.length - 1);
       return sceneAssets[stageIndex] || sceneAssets[0];
     }
 
-    function monsterAsset(name) {
-      const baseName = String(name || "")
-        .replace(/^强敌\s*/, "")
-        .replace(/（强敌）$/, "")
+    function normalizeMonsterId(monster) {
+      if (monster && typeof monster === "object" && monster.monsterId) {
+        const monsterId = String(monster.monsterId);
+        return monsterIds.includes(monsterId) ? monsterId : "";
+      }
+
+      const rawName = monster && typeof monster === "object" ? monster.name : monster;
+      const baseName = String(rawName || "")
+        .replace(/^(强敌|強敵|Strong enemy|Enemy)\s*/i, "")
+        .replace(/（(强敌|強敵)）$/, "")
+        .replace(/\s*\((Strong enemy)\)$/i, "")
         .trim();
-      return monsterAssets[baseName] || "";
+      return legacyMonsterNameIds[baseName] || "";
+    }
+
+    function monsterName(monster) {
+      const monsterId = normalizeMonsterId(monster);
+      if (monsterId) {
+        return t(`monsters.${monsterId}`);
+      }
+
+      if (monster && typeof monster === "object" && monster.name) {
+        return String(monster.name);
+      }
+
+      return String(monster || "");
+    }
+
+    function monsterAsset(monster) {
+      const monsterId = normalizeMonsterId(monster);
+      return monsterAssets[monsterId] || "";
     }
 
     function handleAssetError(image) {
@@ -1192,10 +1475,10 @@
     function renderSceneStage({ scene, location, status, monster = null, compact = false }) {
       const requestedScene = String(scene || "");
       const sceneSource = escapeHtml(knownSceneAssets.has(requestedScene) ? requestedScene : defaultSceneAsset);
-      const locationLabel = escapeHtml(location || "未知区域");
+      const locationLabel = escapeHtml(location || t("common.unknownArea"));
       const statusLabel = escapeHtml(status || "");
-      const monsterName = monster ? String(monster.name || "") : "";
-      const monsterSource = monsterAsset(monsterName);
+      const displayMonsterName = monster ? monsterName(monster) : "";
+      const monsterSource = monsterAsset(monster);
       const strongEnemy = Boolean(monster && monster.strong);
       const stageClasses = ["scene-stage", compact ? "compact" : "", strongEnemy ? "strong-enemy" : ""]
         .filter(Boolean)
@@ -1204,7 +1487,7 @@
       return `
         <div class="${stageClasses}" data-visual="scene-stage">
           <img class="scene-art" src="${sceneSource}" alt="" loading="eager" decoding="async" hidden onload="handleAssetLoad(this)" onerror="handleAssetError(this)">
-          ${monster && monsterSource ? `<img class="monster-art" src="${escapeHtml(monsterSource)}" alt="${escapeHtml(monsterName)}" loading="eager" decoding="async" hidden onload="handleAssetLoad(this)" onerror="handleAssetError(this)">` : ""}
+          ${monster && monsterSource ? `<img class="monster-art" src="${escapeHtml(monsterSource)}" alt="${escapeHtml(displayMonsterName)}" loading="eager" decoding="async" hidden onload="handleAssetLoad(this)" onerror="handleAssetError(this)">` : ""}
           <div class="scene-caption">
             <div class="scene-copy">
               <span class="scene-location">${locationLabel}</span>
@@ -1220,14 +1503,20 @@
       return renderSceneStage(options);
     }
 
-    function addLog(message) {
-      state.logs.unshift(message);
+    function addLog(key, params = {}) {
+      state.logs.unshift(logEntry(key, params));
       state.logs = state.logs.slice(0, 8);
       logRevision += 1;
     }
 
-    function addCombatLog(message) {
-      state.combatLogs.push(message);
+    function addLiteralLog(message) {
+      state.logs.unshift(literalLogEntry(message));
+      state.logs = state.logs.slice(0, 8);
+      logRevision += 1;
+    }
+
+    function addCombatLog(key, params = {}) {
+      state.combatLogs.push(logEntry(key, params));
       state.combatLogs = state.combatLogs.slice(-8);
       combatLogRevision += 1;
     }
@@ -1244,8 +1533,8 @@
     }
 
     function updateGameAnnouncer() {
-      const latestLog = state.logs[0] || "";
-      const latestCombatLog = state.combatLogs[state.combatLogs.length - 1] || "";
+      const latestLog = formatLogEntry(state.logs[0]);
+      const latestCombatLog = formatLogEntry(state.combatLogs[state.combatLogs.length - 1]);
       const messages = [];
 
       if (logRevision !== lastAnnouncedLogRevision && latestLog) {
@@ -1376,7 +1665,7 @@
 
         failedAssets.add(key);
         isReportingFailure = true;
-        addLog("音频播放受限：浏览器拒绝了一个声音资源，游戏仍可继续。");
+        addLog("logs.audioFailure");
         render();
         isReportingFailure = false;
       }
@@ -1509,7 +1798,7 @@
 
       if (screen !== "combat" && hasActiveCombat()) {
         state.activeScreen = "combat";
-        addCombatLog("战斗尚未结束，只能攻击、使用药品或尝试逃跑。");
+        addCombatLog("combatLogs.combatLocked");
         render();
         return;
       }
@@ -1518,62 +1807,69 @@
       render();
     }
 
-    function advanceStory(reason) {
+    function advanceStory(reasonKey, params = {}) {
       state.story.progress += 1;
 
       if (state.story.stage === 0 && state.story.progress >= 2) {
         state.story.stage = 1;
-        state.story.status = "腐烂森林";
+        state.story.statusKey = "rottenForest";
+        state.story.status = "腐爛森林";
         audioController.playSfx("discovery");
-        addLog("腐烂森林的雾墙散开，村外旧路终于露出轮廓。");
+        addLog("logs.unlockForest");
         return;
       }
 
       if (state.story.stage === 1 && state.story.progress >= 5) {
         state.story.stage = 2;
-        state.story.status = "潮湿洞穴";
+        state.story.statusKey = "dampCave";
+        state.story.status = "潮濕洞穴";
         audioController.playSfx("discovery");
-        addLog("潮湿洞穴传来空洞回声，黑蜡痕迹一路延伸到地下。");
+        addLog("logs.unlockCave");
         return;
       }
 
       if (state.story.stage === 2 && state.story.progress >= 9) {
         state.story.stage = 3;
-        state.story.status = "旧王墓穴";
+        state.story.statusKey = "oldKingsTomb";
+        state.story.status = "舊王墓穴";
         audioController.playSfx("discovery");
-        addLog("旧王墓穴的石门缓缓错开，冷风卷着残烛气味扑面而来。");
+        addLog("logs.unlockTomb");
         return;
       }
 
-      if (reason) {
-        if (reason.startsWith("特殊剧情")) {
+      if (reasonKey) {
+        if (reasonKey.startsWith("special")) {
           audioController.playSfx("discovery");
         }
-        addLog(reason);
+        if (getTranslationValue(I18N[DEFAULT_LANGUAGE], `logs.${reasonKey}`) === undefined) {
+          addLiteralLog(reasonKey);
+        } else {
+          addLog(`logs.${reasonKey}`, params);
+        }
       }
     }
 
-    function gainGold(amount, reason) {
+    function gainGold(amount, reasonKey) {
       state.player.gold += amount;
       audioController.playSfx("gold");
-      addLog(`${reason} 获得 ${amount} 金币。`);
+      addLog("logs.gainGold", { reason: translatedParam(`logReasons.${reasonKey}`), amount });
     }
 
-    function gainPotion(reason) {
+    function gainPotion(reasonKey) {
       state.player.potions += 1;
-      addLog(`${reason} 你找到了一瓶治疗药水。`);
+      addLog("logs.gainPotion", { reason: translatedParam(`logReasons.${reasonKey}`) });
     }
 
     function restAtVillage() {
       const { player } = state;
 
       if (player.hp >= player.maxHp) {
-        addLog("你在村口短暂歇脚，但生命值已满，无需治疗。");
+        addLog("logs.restFullHp");
       } else {
         const missingHp = player.maxHp - player.hp;
         const restoredHp = Math.min(Math.ceil(player.maxHp * 0.35), missingHp);
         player.hp += restoredHp;
-        addLog(`你靠着余烬休息片刻，恢复 ${restoredHp} 点生命。`);
+        addLog("logs.restRecover", { amount: restoredHp });
       }
 
       state.activeScreen = "adventure";
@@ -1584,11 +1880,11 @@
         const event = rand(1, 3);
 
         if (event === 1) {
-          gainGold(rand(4, 9), "你帮村民清理封门黑蜡，");
+          gainGold(rand(4, 9), "villageWax");
         } else if (event === 2) {
-          gainPotion("你在废弃药柜里翻找，");
+          gainPotion("abandonedCabinet");
         } else {
-          advanceStory("村井边的老人低声提醒你：森林里的烛影会跟着活人移动。");
+          advanceStory("villageOldMan");
           return;
         }
 
@@ -1597,18 +1893,18 @@
       }
 
       if (source === "forest" && state.story.stage === 0) {
-        addLog("第一只腐枝怪从雾里扑出，通往森林的路必须用武器打开。");
+        addLog("logs.forestForcedCombat");
         startCombat(false, "forest");
         return;
       }
 
       if (source === "cave" && state.story.stage < 1) {
-        addLog("洞穴入口被腐藤和黑蜡封住，先调查森林才能找到入口。");
+        addLog("logs.caveBlocked");
         return;
       }
 
       if (source === "deep" && state.story.stage < 2) {
-        addLog("更深处的石阶沉在积水下，缺少洞穴线索前无法继续。");
+        addLog("logs.deepBlocked");
         return;
       }
 
@@ -1625,30 +1921,30 @@
       }
 
       if (roll <= 70) {
-        gainGold(rand(6, 14), "你在裂开的石缝里摸到旧钱袋，");
+        gainGold(rand(6, 14), "oldCoinPurse");
         advanceStory();
         return;
       }
 
       if (roll <= 84) {
-        gainPotion("你沿着干涸血迹搜寻，");
+        gainPotion("driedBloodTrail");
         advanceStory();
         return;
       }
 
       if (state.story.stage >= 2) {
         state.story.keyFragment = true;
-        advanceStory("特殊剧情：你从墓纹碎片里拼出旧王印记的一角。");
+        advanceStory("specialKingMark");
         return;
       }
 
       if (state.story.stage >= 1) {
         state.story.clueFound = true;
-        advanceStory("特殊剧情：你记下黑蜡祭祀留下的洞穴暗号。");
+        advanceStory("specialCaveCipher");
         return;
       }
 
-      advanceStory("你听见远处钟声倒响，像是有人在催促你继续前进。");
+      advanceStory("distantBell");
     }
 
     function handleAdventureChoice(choice) {
@@ -1681,8 +1977,11 @@
         defense += 1;
       }
 
+      const monsterId = monsterIds[rand(0, monsterIds.length - 1)];
+
       return {
-        name: monsterNames[rand(0, monsterNames.length - 1)],
+        monsterId,
+        name: t(`monsters.${monsterId}`),
         maxHp,
         hp: maxHp,
         attack,
@@ -1702,7 +2001,10 @@
       const monster = generateMonster(strong, source);
       state.currentMonster = monster;
       state.combatLogs = [];
-      addCombatLog(`${monster.strong ? "强敌" : "敌人"} ${monster.name} 从阴影中逼近。`);
+      addCombatLog("combatLogs.combatStart", {
+        enemyType: translatedParam(monster.strong ? "combatLogs.strongEnemy" : "combatLogs.enemy"),
+        monsterName: monsterNameParam(monster)
+      });
       state.activeScreen = "combat";
       render();
     }
@@ -1711,7 +2013,7 @@
       const monster = state.currentMonster;
 
       if (state.activeScreen !== "combat" || !monster || monster.hp <= 0) {
-        addCombatLog("战斗已经结束。");
+        addCombatLog("combatLogs.combatEnded");
         render();
         return;
       }
@@ -1719,7 +2021,7 @@
       const damage = calculateDamage(state.player.attack, monster.defense);
       monster.hp = Math.max(0, monster.hp - damage);
       audioController.playSfx("playerAttack");
-      addCombatLog(`你攻击 ${monster.name}，造成 ${damage} 点伤害。`);
+      addCombatLog("combatLogs.playerAttack", { monsterName: monsterNameParam(monster), damage });
 
       if (monster.hp <= 0) {
         finishVictory();
@@ -1741,7 +2043,7 @@
       state.player.hp = Math.max(0, state.player.hp - damage);
       audioController.playSfx("monsterAttack");
       audioController.playSfx("playerHit");
-      addCombatLog(`${monster.name} 反击，造成 ${damage} 点伤害。`);
+      addCombatLog("combatLogs.monsterCounter", { monsterName: monsterNameParam(monster), damage });
 
       if (state.player.hp <= 0) {
         handleDefeat();
@@ -1763,10 +2065,10 @@
       audioController.playSfx("victory");
       audioController.playSfx("gold");
 
-      addCombatLog(`你击败了 ${monster.name}，获得 ${expReward} 经验和 ${goldReward} 金币。`);
-      addLog(`战斗胜利：击败 ${monster.name}，获得 ${expReward} 经验和 ${goldReward} 金币。`);
+      addCombatLog("combatLogs.victory", { monsterName: monsterNameParam(monster), exp: expReward, gold: goldReward });
+      addLog("logs.victory", { monsterName: monsterNameParam(monster), exp: expReward, gold: goldReward });
       state.currentMonster = null;
-      advanceStory(`你从战斗余烬中辨认出通往${currentStage().name}深处的新痕迹。`);
+      advanceStory("combatTrace", { stageName: translatedParam(`stages.${currentStage().id}.name`) });
       checkLevelUps();
       state.activeScreen = "adventure";
       render();
@@ -1778,8 +2080,11 @@
       state.player.gold -= lostGold;
       state.player.hp = 1;
       audioController.playSfx("defeat");
-      addCombatLog(`你被${monster ? monster.name : "敌人"}击倒，失去 ${lostGold} 金币后勉强逃回安全处。`);
-      addLog(`战斗失败：你失去 ${lostGold} 金币，生命值降至 1。`);
+      addCombatLog("combatLogs.defeat", {
+        monsterName: monster ? monsterNameParam(monster) : translatedParam("combatLogs.unknownEnemy"),
+        gold: lostGold
+      });
+      addLog("logs.defeat", { gold: lostGold });
       state.currentMonster = null;
       state.activeScreen = "adventure";
     }
@@ -1788,15 +2093,15 @@
       const monster = state.currentMonster;
 
       if (!monster) {
-        addCombatLog("没有敌人阻拦你。");
+        addCombatLog("combatLogs.noEnemy");
         state.activeScreen = "adventure";
         render();
         return;
       }
 
       if (rand(1, 100) <= 60) {
-        addCombatLog(`你摆脱了 ${monster.name}，撤回安全路线。`);
-        addLog("你选择撤退，保住了继续探索的机会。");
+        addCombatLog("combatLogs.fleeSuccess", { monsterName: monsterNameParam(monster) });
+        addLog("logs.fleeSuccess");
         audioController.playSfx("flee");
         state.currentMonster = null;
         state.activeScreen = "adventure";
@@ -1804,7 +2109,7 @@
         return;
       }
 
-      addCombatLog("逃跑失败，敌人抓住破绽追击。");
+      addCombatLog("combatLogs.fleeFail");
       monsterAttack();
       render();
     }
@@ -1827,7 +2132,13 @@
         const restoredHp = Math.min(player.maxHp - player.hp, Math.ceil(hpIncrease * 0.5) + 4);
         player.hp += restoredHp;
         audioController.playSfx("levelUp");
-        addLog(`升级到 ${player.level} 级：攻击 +${attackIncrease}，防御 +${defenseIncrease}，生命上限 +${hpIncrease}，恢复 ${restoredHp} 点生命。`);
+        addLog("logs.levelUp", {
+          level: player.level,
+          attack: attackIncrease,
+          defense: defenseIncrease,
+          hp: hpIncrease,
+          restoredHp
+        });
       }
 
       if (player.level >= MAX_LEVEL) {
@@ -1839,7 +2150,7 @@
       const { player } = state;
 
       if (player.gold < POTION_PRICE) {
-        addLog(`金币不足：黑烛药剂需要 ${POTION_PRICE} 金币。`);
+        addLog("logs.purchaseFailure", { price: POTION_PRICE });
         render();
         return;
       }
@@ -1847,7 +2158,7 @@
       player.gold -= POTION_PRICE;
       player.potions += 1;
       audioController.playSfx("purchase");
-      addLog(`购买黑烛药剂，花费 ${POTION_PRICE} 金币。`);
+      addLog("logs.purchaseSuccess", { price: POTION_PRICE });
       render();
     }
 
@@ -1855,34 +2166,35 @@
       const { player } = state;
 
       if (context !== "inventory" && context !== "combat") {
-        addLog("无法使用药品：无效的使用方式。");
+        addLog("logs.invalidPotionContext");
         render();
         return;
       }
 
       if (context === "combat" && (state.activeScreen !== "combat" || !hasActiveCombat())) {
-        addLog("当前没有进行中的战斗，无法使用战斗药品操作。");
+        addLog("logs.noActiveCombatPotion");
         render();
         return;
       }
 
       if (context === "inventory" && hasActiveCombat()) {
         state.activeScreen = "combat";
-        addCombatLog("战斗尚未结束，请使用战斗界面的“使用药品”操作。");
+        addCombatLog("combatLogs.inventoryBlockedByCombat");
         render();
         return;
       }
 
       const log = context === "combat" ? addCombatLog : addLog;
+      const potionLogScope = context === "combat" ? "combatLogs" : "logs";
 
       if (player.potions <= 0) {
-        log("背包里没有黑烛药剂。");
+        log(`${potionLogScope}.noPotion`);
         render();
         return;
       }
 
       if (player.hp >= player.maxHp) {
-        log("生命值已满，没有消耗药剂。");
+        log(`${potionLogScope}.hpFullNoPotion`);
         render();
         return;
       }
@@ -1891,7 +2203,7 @@
       player.hp += healed;
       player.potions -= 1;
       audioController.playSfx("potion");
-      log(`使用黑烛药剂，恢复 ${healed} 点生命值。`);
+      log(`${potionLogScope}.usePotion`, { amount: healed });
 
       if (context === "combat" && hasActiveCombat()) {
         monsterAttack();
@@ -1994,7 +2306,7 @@
         <aside class="log-panel">
           <h2>${escapeHtml(t("common.logs"))}</h2>
           <div class="log-list" role="log" aria-live="polite" aria-relevant="additions text">
-            ${state.logs.map((entry) => `<p>${escapeHtml(entry)}</p>`).join("")}
+            ${state.logs.map((entry) => `<p>${escapeHtml(formatLogEntry(entry))}</p>`).join("")}
           </div>
         </aside>
       `;
@@ -2006,8 +2318,8 @@
           <h2>${escapeHtml(t(SCREENS.main))}</h2>
           ${renderSceneStage({
             scene: currentSceneAsset(),
-            location: currentStage().name,
-            status: state.story.status
+            location: stageText(currentStageIndex(), "name"),
+            status: currentStoryStatus()
           })}
           <p class="muted">${escapeHtml(t("main.placeholder"))}</p>
           <div class="guide">
@@ -2023,20 +2335,22 @@
     }
 
     function renderAdventure() {
-      const stage = currentStage();
+      const stageIndex = currentStageIndex();
+      const stageName = stageText(stageIndex, "name");
+      const stageDescription = stageText(stageIndex, "description");
 
       return `
         <section class="panel">
-          <h2>${stage.name}</h2>
+          <h2>${escapeHtml(stageName)}</h2>
           ${renderSceneStage({
             scene: currentSceneAsset(),
-            location: stage.name,
-            status: state.story.status
+            location: stageName,
+            status: currentStoryStatus()
           })}
-          <p>${stage.description}</p>
+          <p>${escapeHtml(stageDescription)}</p>
           <div class="info-grid">
             <div><strong>${escapeHtml(t("common.progressedEvents"))}</strong><br>${escapeHtml(t("common.eventCount", { count: state.story.progress }))}</div>
-            <div><strong>${escapeHtml(t("common.currentStatus"))}</strong><br>${escapeHtml(state.story.status)}</div>
+            <div><strong>${escapeHtml(t("common.currentStatus"))}</strong><br>${escapeHtml(currentStoryStatus())}</div>
           </div>
           <div class="actions">
             <button type="button" onclick="handleAdventureChoice('forest')">${escapeHtml(t("actions.enterForest"))}</button>
@@ -2065,7 +2379,7 @@
             </div>
             <h3>${escapeHtml(t("combat.logHeading"))}</h3>
             <div class="combat-log" role="log" aria-live="polite">
-              ${state.combatLogs.length ? state.combatLogs.map((entry) => `<p>${escapeHtml(entry)}</p>`).join("") : `<p>${escapeHtml(t("common.noCombatRecords"))}</p>`}
+              ${state.combatLogs.length ? state.combatLogs.map((entry) => `<p>${escapeHtml(formatLogEntry(entry))}</p>`).join("") : `<p>${escapeHtml(t("common.noCombatRecords"))}</p>`}
             </div>
           </section>
         `;
@@ -2076,7 +2390,7 @@
           <h2>${escapeHtml(t("combat.heading"))}</h2>
           ${renderSceneStage({
             scene: currentSceneAsset(),
-            location: currentStage().name,
+            location: stageText(currentStageIndex(), "name"),
             status: t("combat.status"),
             monster
           })}
@@ -2089,7 +2403,7 @@
               <p>${escapeHtml(t("combat.defense", { defense: player.defense }))}</p>
             </div>
             <div class="combatant danger">
-              <h3${monster.strong ? ` aria-label="${escapeHtml(`${monster.name}（${t("common.strongEnemy")}）`)}"` : ""}>${escapeHtml(monster.name)}</h3>
+              <h3${monster.strong ? ` aria-label="${escapeHtml(`${monsterName(monster)} (${t("common.strongEnemy")})`)}"` : ""}>${escapeHtml(monsterName(monster))}</h3>
               <p>${escapeHtml(t("combat.enemyHp", { hp: monster.hp, maxHp: monster.maxHp }))}</p>
               ${meter(monster.hp, monster.maxHp, "enemy")}
               <p>${escapeHtml(t("combat.attack", { attack: monster.attack }))}</p>
@@ -2103,7 +2417,7 @@
           </div>
           <h3>${escapeHtml(t("combat.logHeading"))}</h3>
           <div class="combat-log" role="log" aria-live="polite">
-            ${state.combatLogs.length ? state.combatLogs.map((entry) => `<p>${escapeHtml(entry)}</p>`).join("") : `<p>${escapeHtml(t("common.noCombatRecords"))}</p>`}
+            ${state.combatLogs.length ? state.combatLogs.map((entry) => `<p>${escapeHtml(formatLogEntry(entry))}</p>`).join("") : `<p>${escapeHtml(t("common.noCombatRecords"))}</p>`}
           </div>
         </section>
       `;
@@ -2140,15 +2454,15 @@
     }
 
     function renderProfile() {
-      const { player, story } = state;
+      const { player } = state;
 
       return `
         <section class="panel">
           <h2>${escapeHtml(t(SCREENS.profile))}</h2>
           ${renderSceneStage({
             scene: currentSceneAsset(),
-            location: currentStage().name,
-            status: story.status,
+            location: stageText(currentStageIndex(), "name"),
+            status: currentStoryStatus(),
             compact: true
           })}
           <div class="info-grid">
@@ -2160,7 +2474,7 @@
             <div><strong>${escapeHtml(t("profile.labels.defense"))}</strong><br>${player.defense}</div>
             <div><strong>${escapeHtml(t("profile.labels.gold"))}</strong><br>${player.gold}</div>
             <div><strong>${escapeHtml(t("profile.labels.potions"))}</strong><br>${player.potions}</div>
-            <div><strong>${escapeHtml(t("profile.labels.status"))}</strong><br>${escapeHtml(story.status)}</div>
+            <div><strong>${escapeHtml(t("profile.labels.status"))}</strong><br>${escapeHtml(currentStoryStatus())}</div>
           </div>
         </section>
       `;
