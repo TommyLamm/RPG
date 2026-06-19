@@ -735,6 +735,93 @@
       margin: 0;
     }
 
+    .event-card {
+      border: 1px solid rgba(214, 162, 73, 0.45);
+      border-radius: 8px;
+      background: rgba(31, 24, 17, 0.76);
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 14px;
+    }
+
+    .event-card h3 {
+      color: var(--gold);
+      margin: 0;
+    }
+
+    .event-card p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .event-options {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .relic-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      margin-top: 14px;
+    }
+
+    .relic-card {
+      border: 1px solid rgba(214, 162, 73, 0.38);
+      border-radius: 8px;
+      background: rgba(21, 18, 15, 0.62);
+      min-width: 0;
+      padding: 12px;
+    }
+
+    .relic-card h3 {
+      color: var(--gold);
+      font-size: 16px;
+      margin: 0 0 6px;
+    }
+
+    .relic-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .relic-meta {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .relic-tag {
+      display: inline-flex;
+      width: fit-content;
+      border: 1px solid rgba(126, 145, 160, 0.5);
+      border-radius: 999px;
+      color: var(--bone);
+      font-size: 12px;
+      line-height: 1.2;
+      padding: 3px 8px;
+    }
+
+    .relic-tag.active {
+      border-color: rgba(214, 168, 79, 0.72);
+      color: #ffe4ad;
+    }
+
+    .boss-callout {
+      border-left-color: var(--gold);
+      background: rgba(214, 168, 79, 0.12);
+    }
+
+    @media (max-width: 860px) {
+      .event-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .meter {
       overflow: hidden;
       height: 12px;
@@ -1015,6 +1102,8 @@
     const AUDIO_SETTINGS_KEY = "black-candle-audio-v1";
     const DEFAULT_AUDIO_SETTINGS = Object.freeze({ muted: false, musicVolume: 0.42, sfxVolume: 0.72 });
     const LANGUAGE_KEY = "black-candle-language-v1";
+    const SAVE_KEY = "black-candle-save-v1";
+    const SAVE_VERSION = 1;
     const DEFAULT_LANGUAGE = "zhHant";
     const LANGUAGES = {
       zhHant: { label: "繁體中文", htmlLang: "zh-Hant" },
@@ -1057,6 +1146,7 @@
           logs: "日誌",
           currentStatus: "當前狀態",
           progressedEvents: "已推進事件",
+          chapterGoal: "章節目標",
           strongEnemy: "強敵",
           eventCount: "{count} 次",
           unknownArea: "未知區域"
@@ -1070,6 +1160,12 @@
           fleshGuard: "腐肉守衛",
           tombHunter: "墓穴獵手",
           blackCandleCultist: "黑燭信徒"
+        },
+        bosses: {
+          ashGateWarden: "灰門守衛",
+          rotrootAlpha: "腐根狼王",
+          blackWaxSeer: "黑蠟司祭",
+          oldKingHusk: "舊王殘軀"
         },
         stages: {
           ashVillage: {
@@ -1111,6 +1207,43 @@
           specialCaveCipher: "特殊劇情：你記下黑蠟祭祀留下的洞穴暗號。",
           distantBell: "你聽見遠處鐘聲倒響，像是有人在催促你繼續前進。",
           combatTrace: "你從戰鬥餘燼中辨認出通往{stageName}深處的新痕跡。",
+          bossAppears: "{bossName} 擋住通往下一區的路，必須擊敗它才能前進。",
+          bossBlocks: "{bossName} 仍守著出口，先挑戰 Boss 才能繼續深入。",
+          bossVictory: "Boss 戰勝利：擊敗 {bossName}，獲得 {exp} 經驗和 {gold} 金幣。",
+          finalBossVictory: "舊王墓穴的黑燭熄滅，這段探索暫時告一段落。",
+          eventFound: "探索事件：你發現「{eventName}」。",
+          eventAltarSafe: "你謹慎清理祭壇邊緣，恢復 {amount} 點生命。",
+          eventAltarRisk: "你觸碰祭壇核心，受傷 {damage} 點但找到 {gold} 金幣。",
+          eventAltarResource: "你獻上一瓶藥劑穩住黑焰，獲得 {gold} 金幣並推進線索。",
+          eventChestSafe: "你慢慢拆開寶箱，獲得 {gold} 金幣。",
+          eventChestRiskGold: "你強行撬開寶箱，獲得 {gold} 金幣。",
+          eventChestRiskCombat: "寶箱裡的黑蠟碎片化成敵影。",
+          eventChestResource: "你花費 {cost} 金幣買通鎖扣，找到一瓶藥劑。",
+          eventForkSafe: "你沿著有標記的小路前進，記下一段可靠路線。",
+          eventForkRisk: "你衝入陌生岔路，驚動了潛伏的敵人。",
+          eventForkResource: "你用血跡標出回程路，受傷 {damage} 點但找到 {gold} 金幣。",
+          eventTravelerSafe: "你護送受傷旅人回到路口，得到一瓶藥劑。",
+          eventTravelerRisk: "你追查旅人的求救聲，遭遇埋伏。",
+          eventTravelerResource: "你交出一瓶藥劑救下旅人，獲得 {gold} 金幣與關鍵線索。",
+          eventReliquarySafe: "你記下聖匣上的刻痕，穩定推進探索。",
+          eventReliquaryRisk: "你撬開聖匣，受傷 {damage} 點但取出 {gold} 金幣。",
+          eventReliquaryResource: "你花費 {cost} 金幣修補聖匣機關，恢復 {amount} 點生命。",
+          eventSupplyCacheSafe: "你清點補給袋，獲得 {gold} 金幣。",
+          eventSupplyCacheRisk: "你翻倒補給堆，找到 {gold} 金幣與一瓶藥劑。",
+          eventSupplyCacheResource: "你交出一瓶藥劑換取地圖標記，獲得 {gold} 金幣。",
+          eventNoPotion: "你沒有藥劑可投入這個選擇。",
+          eventNoGold: "你的金幣不足，無法支付這個選擇。",
+          relicFound: "探索獎勵：你取得遺物「{relicName}」。",
+          relicBossReward: "Boss 獎勵：你取得遺物「{relicName}」。",
+          relicKillHeal: "{relicName} 吸收殘火，恢復 {amount} 點生命。",
+          relicPotionBoost: "{relicName} 強化藥劑，多恢復 {amount} 點生命。",
+          relicDeathProtection: "{relicName} 破裂成灰，這次戰敗沒有失去金幣。",
+          relicBossEntryHeal: "{relicName} 在 Boss 戰前亮起，恢復 {amount} 點生命。",
+          relicEventGold: "{relicName} 標出隱藏補給，額外獲得 {amount} 金幣。",
+          saveLoaded: "讀檔完成：你回到上次保存的探索狀態。",
+          newGameStarted: "新遊戲開始：進度已重置並建立新的存檔。",
+          progressReset: "進度已重置：本機存檔已清除。",
+          saveNewerVersion: "無法讀取存檔：這份存檔版本 v{version} 較新，目前版本只能讀取到 v{currentVersion}。",
           victory: "戰鬥勝利：擊敗 {monsterName}，獲得 {exp} 經驗和 {gold} 金幣。",
           defeat: "戰鬥失敗：你失去 {gold} 金幣，生命值降至 1。",
           fleeSuccess: "你選擇撤退，保住了繼續探索的機會。",
@@ -1121,7 +1254,8 @@
           noActiveCombatPotion: "當前沒有進行中的戰鬥，無法使用戰鬥藥品操作。",
           noPotion: "背包裡沒有黑燭藥劑。",
           hpFullNoPotion: "生命值已滿，沒有消耗藥劑。",
-          usePotion: "使用黑燭藥劑，恢復 {amount} 點生命值。"
+          usePotion: "使用黑燭藥劑，恢復 {amount} 點生命值。",
+          expeditionComplete: "遠征已完成：舊王墓穴的黑燭已熄滅。"
         },
         logReasons: {
           villageWax: "你幫村民清理封門黑蠟，",
@@ -1152,6 +1286,16 @@
           burningCurse: "黑焰詛咒纏上 {monsterName}，造成 {damage} 點傷害並留下燃燒。",
           burnTick: "{monsterName} 被燃燒吞噬，受到 {damage} 點持續傷害。",
           guardReduced: "防禦架勢擋下部分攻勢，傷害降低 {amount} 點。",
+          slimeHeal: "{monsterName} 吞食濕泥，恢復 {amount} 點生命。",
+          wolfDoubleStrike: "{monsterName} 趁勢連擊，追加造成 {damage} 點傷害。",
+          shadowFleePunish: "{monsterName} 扯住你的影子，逃跑失敗額外造成 {damage} 點傷害。",
+          cultistCurse: "{monsterName} 點燃黑燭咒印，你受到持續傷害且防禦下降。",
+          cultistCurseTick: "黑燭咒印灼痛你，造成 {damage} 點傷害。",
+          relicKillHeal: "{relicName} 讓你在擊殺後恢復 {amount} 點生命。",
+          relicPotionBoost: "{relicName} 強化藥劑，多恢復 {amount} 點生命。",
+          relicFleeGuard: "{relicName} 扯斷影縛，逃跑懲罰降低 {amount} 點。",
+          relicDeathProtection: "{relicName} 保住你的金幣，之後將失去光澤。",
+          relicBossEntryHeal: "{relicName} 在 Boss 戰前恢復 {amount} 點生命。",
           skillUnavailable: "{skillName} 目前無法使用。"
         },
         skills: {
@@ -1175,9 +1319,65 @@
         effects: {
           guarded: "防禦中：下一次受擊減傷",
           burn: "燃燒：剩餘 {turns} 回合",
-          heavyRecovering: "重擊恢復：下回合可再使用"
+          heavyRecovering: "重擊恢復：下回合可再使用",
+          blackCandleCurse: "黑燭咒印：剩餘 {turns} 回合，防禦 -{defensePenalty}",
+          lowHpDefense: "{relicName}：低血量防禦 +{amount}"
+        },
+        relics: {
+          heading: "已獲得遺物",
+          empty: "尚未獲得遺物。Boss 與深入探索可能留下可用的被動力量。",
+          used: "已觸發",
+          active: "生效中",
+          source: "來源：{source}",
+          emberCharm: {
+            name: "餘燼護符",
+            description: "擊敗敵人後恢復 3 點生命。"
+          },
+          waxsealedVial: {
+            name: "封蠟小瓶",
+            description: "藥劑額外恢復 5 點生命。"
+          },
+          shadowTether: {
+            name: "斷影繩",
+            description: "暗影獸逃跑失敗的額外懲罰降低一半。"
+          },
+          burialCoin: {
+            name: "陪葬金幣",
+            description: "首次戰敗時不會失去金幣，觸發後仍保留紀錄。"
+          },
+          ironrootBadge: {
+            name: "鐵根徽記",
+            description: "生命低於 35% 時，防禦提高 2 點。"
+          },
+          dawnflask: {
+            name: "破曉小瓶",
+            description: "每個 Boss 首次開戰時恢復 8 點生命。"
+          },
+          scavengerMap: {
+            name: "拾荒者地圖",
+            description: "探索事件獲得金幣時額外獲得 3 金幣。"
+          }
+        },
+        relicSources: {
+          ashGateWarden: "擊敗灰門守衛",
+          altar: "黑蠟祭壇事件",
+          rotrootAlpha: "擊敗腐根狼王",
+          traveler: "受傷旅人事件",
+          blackWaxSeer: "擊敗黑蠟司祭",
+          reliquary: "裂紋聖匣事件",
+          supplyCache: "補給殘袋事件"
+        },
+        adventure: {
+          stageGoal: "再推進 {count} 次探索後，將遇到 {bossName}。",
+          bossPending: "{bossName} 已阻擋出口。先挑戰 Boss 才能繼續深入。",
+          bossReady: "Boss 挑戰已開啟",
+          expeditionComplete: "遠征完成：舊王墓穴的黑燭已熄滅。你可以整理背包、查看遺物，或開始新遊戲。",
+          expeditionCompleteStatus: "遠征完成"
         },
         actions: {
+          newGame: "新遊戲",
+          continueGame: "繼續遊戲",
+          resetProgress: "重置進度",
           startAdventure: "開始冒險",
           goShop: "前往商店",
           viewProfile: "查看個人資訊",
@@ -1185,6 +1385,8 @@
           exploreCave: "探索洞穴",
           goVillage: "前往村莊",
           challengeMonster: "挑戰怪物",
+          challengeBoss: "挑戰 Boss",
+          resolveEvent: "選擇",
           rest: "返回休息",
           goDeeper: "繼續深入",
           returnAdventure: "返回冒險",
@@ -1195,7 +1397,13 @@
         },
         main: {
           placeholder: "潮濕石牆吞下腳步聲。這裡將顯示探索、戰鬥與休整內容。",
-          guide: "新玩家指南：先進入劇情冒險推進當前進度，受傷後回到村莊休息；金幣可在商店購買治療藥劑。"
+          guide: "新玩家指南：先進入劇情冒險推進當前進度，受傷後回到村莊休息；金幣可在商店購買治療藥劑。",
+          saveHeading: "冒險存檔",
+          saveEmpty: "尚未建立本機存檔。開始冒險或按下新遊戲後會自動保存。",
+          saveAvailable: "已有本機存檔。",
+          saveLastSaved: "最後保存：{time}",
+          saveVersion: "存檔版本：v{version}",
+          saveUnknownTime: "未知時間"
         },
         shop: {
           heading: "商店介面",
@@ -1210,6 +1418,7 @@
         },
         profile: {
           maxLevel: "已達上限",
+          relicSummary: "{count} 件遺物",
           labels: {
             level: "玩家等級",
             exp: "當前經驗值",
@@ -1226,7 +1435,70 @@
           heading: "背包或道具使用介面",
           potionCount: "黑燭藥劑 x {count}",
           healRange: "隨機恢復 {min} 到 {max} 點生命值",
-          currentHp: "當前生命值：{hp} / {maxHp}"
+          currentHp: "當前生命值：{hp} / {maxHp}",
+          relicSection: "遺物收藏"
+        },
+        events: {
+          altar: {
+            title: "黑蠟祭壇",
+            description: "冷掉的黑蠟在祭壇上微微起伏，像仍在呼吸。",
+            safeLabel: "謹慎祈禱",
+            safeDescription: "安全：恢復少量生命並推進探索。",
+            riskLabel: "觸碰核心",
+            riskDescription: "風險：受傷，但可能得到更多金幣。",
+            resourceLabel: "獻上藥劑",
+            resourceDescription: "消耗 1 瓶藥劑，換取金幣與穩定線索。"
+          },
+          chest: {
+            title: "封蠟寶箱",
+            description: "箱蓋被黑蠟封死，裡面傳出金屬撞擊聲。",
+            safeLabel: "慢慢拆封",
+            safeDescription: "安全：獲得少量金幣並推進探索。",
+            riskLabel: "強行撬開",
+            riskDescription: "風險：高收益，或觸發戰鬥。",
+            resourceLabel: "支付開鎖",
+            resourceDescription: "消耗 5 金幣，獲得 1 瓶藥劑。"
+          },
+          fork: {
+            title: "霧中岔路",
+            description: "兩條路都被霧吞沒，只有一枚舊路標還看得清。",
+            safeLabel: "走有標記的路",
+            safeDescription: "安全：穩定推進探索。",
+            riskLabel: "衝入陌生路",
+            riskDescription: "風險：可能遭遇戰鬥。",
+            resourceLabel: "用血標路",
+            resourceDescription: "消耗生命，換取金幣與進度。"
+          },
+          traveler: {
+            title: "受傷旅人",
+            description: "旅人倒在黑蠟旁，抓著一枚刻著王冠的碎片。",
+            safeLabel: "護送回路口",
+            safeDescription: "安全：獲得 1 瓶藥劑。",
+            riskLabel: "追查求救聲",
+            riskDescription: "風險：可能遭遇埋伏。",
+            resourceLabel: "交出藥劑",
+            resourceDescription: "消耗 1 瓶藥劑，換取金幣與線索。"
+          },
+          reliquary: {
+            title: "裂紋聖匣",
+            description: "一只古老聖匣卡在樹根與黑蠟之間，縫隙裡透出淡金微光。",
+            safeLabel: "記下刻痕",
+            safeDescription: "安全：推進探索，並可能取得支援 Boss 戰的遺物。",
+            riskLabel: "撬開聖匣",
+            riskDescription: "風險：受傷，但可取得金幣。",
+            resourceLabel: "修補機關",
+            resourceDescription: "消耗 4 金幣，恢復生命並推進探索。"
+          },
+          supplyCache: {
+            title: "補給殘袋",
+            description: "破布袋被壓在倒塌石柱下，裡面混著硬幣、灰燼與舊路線圖。",
+            safeLabel: "清點補給",
+            safeDescription: "安全：獲得金幣並推進探索。",
+            riskLabel: "翻倒殘袋",
+            riskDescription: "風險：可能找到更多補給。",
+            resourceLabel: "交換標記",
+            resourceDescription: "消耗 1 瓶藥劑，換取更多金幣與路線。"
+          }
         },
         combat: {
           heading: "戰鬥介面",
@@ -1276,6 +1548,7 @@
           logs: "Logs",
           currentStatus: "Current status",
           progressedEvents: "Progressed events",
+          chapterGoal: "Chapter goal",
           strongEnemy: "Strong enemy",
           eventCount: "{count} times",
           unknownArea: "Unknown area"
@@ -1289,6 +1562,12 @@
           fleshGuard: "Flesh Guard",
           tombHunter: "Tomb Hunter",
           blackCandleCultist: "Black Candle Cultist"
+        },
+        bosses: {
+          ashGateWarden: "Ash Gate Warden",
+          rotrootAlpha: "Rotroot Alpha",
+          blackWaxSeer: "Black Wax Seer",
+          oldKingHusk: "Old King's Husk"
         },
         stages: {
           ashVillage: {
@@ -1330,6 +1609,43 @@
           specialCaveCipher: "Special discovery: you record the cave cipher left behind by the black-wax cult.",
           distantBell: "You hear a distant bell ringing backward, as if someone is urging you onward.",
           combatTrace: "In the ashes of battle, you spot a fresh trail leading deeper into {stageName}.",
+          bossAppears: "{bossName} blocks the way forward. Defeat it to unlock the next area.",
+          bossBlocks: "{bossName} still guards the exit. Challenge the Boss before exploring deeper.",
+          bossVictory: "Boss victory: defeated {bossName}, gaining {exp} EXP and {gold} gold.",
+          finalBossVictory: "The black candles in the Old King's Tomb go out. This expedition is complete for now.",
+          eventFound: "Exploration event: you discover \"{eventName}\".",
+          eventAltarSafe: "You carefully clear the altar edge and recover {amount} HP.",
+          eventAltarRisk: "You touch the altar core, taking {damage} damage but finding {gold} gold.",
+          eventAltarResource: "You offer a potion to steady the black flame, gaining {gold} gold and a clear lead.",
+          eventChestSafe: "You slowly unseal the chest and gain {gold} gold.",
+          eventChestRiskGold: "You force the chest open and gain {gold} gold.",
+          eventChestRiskCombat: "The black-wax shards inside the chest rise into an enemy shape.",
+          eventChestResource: "You spend {cost} gold to work the lock and find a potion.",
+          eventForkSafe: "You follow the marked path and record a reliable route.",
+          eventForkRisk: "You rush into the unknown fork and alert a hidden enemy.",
+          eventForkResource: "You mark the way back with blood, taking {damage} damage but finding {gold} gold.",
+          eventTravelerSafe: "You escort the wounded traveler back to the road and receive a potion.",
+          eventTravelerRisk: "You investigate the traveler's call for help and walk into an ambush.",
+          eventTravelerResource: "You give up a potion to save the traveler, gaining {gold} gold and a key clue.",
+          eventReliquarySafe: "You copy the marks on the reliquary and make steady progress.",
+          eventReliquaryRisk: "You pry open the reliquary, taking {damage} damage but pulling out {gold} gold.",
+          eventReliquaryResource: "You spend {cost} gold repairing the reliquary mechanism and recover {amount} HP.",
+          eventSupplyCacheSafe: "You sort through the supply pouch and gain {gold} gold.",
+          eventSupplyCacheRisk: "You overturn the supplies and find {gold} gold plus a potion.",
+          eventSupplyCacheResource: "You trade a potion for map marks and gain {gold} gold.",
+          eventNoPotion: "You do not have a potion for this choice.",
+          eventNoGold: "You do not have enough gold for this choice.",
+          relicFound: "Exploration reward: you gain the relic \"{relicName}\".",
+          relicBossReward: "Boss reward: you gain the relic \"{relicName}\".",
+          relicKillHeal: "{relicName} drinks in the dying ember and restores {amount} HP.",
+          relicPotionBoost: "{relicName} empowers the potion, restoring {amount} more HP.",
+          relicDeathProtection: "{relicName} cracks into ash, so this defeat costs no gold.",
+          relicBossEntryHeal: "{relicName} lights before the Boss fight, restoring {amount} HP.",
+          relicEventGold: "{relicName} marks hidden supplies, granting {amount} extra gold.",
+          saveLoaded: "Loaded save: you return to the last saved expedition state.",
+          newGameStarted: "New game started: progress was reset and a fresh save was created.",
+          progressReset: "Progress reset: local save data was cleared.",
+          saveNewerVersion: "Cannot load save: this save is v{version}, but this build can only read up to v{currentVersion}.",
           victory: "Combat victory: defeated {monsterName}, gaining {exp} EXP and {gold} gold.",
           defeat: "Combat defeat: you lose {gold} gold and your HP falls to 1.",
           fleeSuccess: "You withdraw, preserving your chance to keep exploring.",
@@ -1340,7 +1656,8 @@
           noActiveCombatPotion: "There is no active combat, so combat potion use is unavailable.",
           noPotion: "There are no Black Candle Potions in your bag.",
           hpFullNoPotion: "HP is already full, so no potion was consumed.",
-          usePotion: "Used a Black Candle Potion and restored {amount} HP."
+          usePotion: "Used a Black Candle Potion and restored {amount} HP.",
+          expeditionComplete: "Expedition complete: the black candles in the Old King's Tomb are out."
         },
         logReasons: {
           villageWax: "You clear black wax from the sealed village gate and",
@@ -1371,6 +1688,16 @@
           burningCurse: "Black flame coils around {monsterName}, dealing {damage} damage and leaving a burn.",
           burnTick: "{monsterName} burns for {damage} ongoing damage.",
           guardReduced: "Your guard absorbs the blow, reducing damage by {amount}.",
+          slimeHeal: "{monsterName} swallows wet clay and restores {amount} HP.",
+          wolfDoubleStrike: "{monsterName} follows through with a second strike, dealing {damage} more damage.",
+          shadowFleePunish: "{monsterName} hooks your shadow, dealing {damage} extra damage after the failed flee.",
+          cultistCurse: "{monsterName} lights a Black Candle brand. You take ongoing damage and lose defense.",
+          cultistCurseTick: "The Black Candle brand burns you for {damage} damage.",
+          relicKillHeal: "{relicName} restores {amount} HP after the kill.",
+          relicPotionBoost: "{relicName} empowers the potion, restoring {amount} more HP.",
+          relicFleeGuard: "{relicName} snaps the shadow bind, reducing the flee penalty by {amount}.",
+          relicDeathProtection: "{relicName} protects your gold and then goes dim.",
+          relicBossEntryHeal: "{relicName} restores {amount} HP before the Boss fight.",
           skillUnavailable: "{skillName} is unavailable right now."
         },
         skills: {
@@ -1394,9 +1721,65 @@
         effects: {
           guarded: "Guarded: next hit reduced",
           burn: "Burn: {turns} turns left",
-          heavyRecovering: "Heavy recovery: ready next turn"
+          heavyRecovering: "Heavy recovery: ready next turn",
+          blackCandleCurse: "Black Candle brand: {turns} turns left, defense -{defensePenalty}",
+          lowHpDefense: "{relicName}: low-HP defense +{amount}"
+        },
+        relics: {
+          heading: "Acquired relics",
+          empty: "No relics yet. Bosses and deeper exploration may leave passive power behind.",
+          used: "Triggered",
+          active: "Active",
+          source: "Source: {source}",
+          emberCharm: {
+            name: "Ember Charm",
+            description: "Recover 3 HP after defeating an enemy."
+          },
+          waxsealedVial: {
+            name: "Wax-Sealed Vial",
+            description: "Potions restore 5 additional HP."
+          },
+          shadowTether: {
+            name: "Severed Shadow Cord",
+            description: "Halves Shadow Beast extra damage when fleeing fails."
+          },
+          burialCoin: {
+            name: "Burial Coin",
+            description: "The first defeat costs no gold; the relic remains as a record after triggering."
+          },
+          ironrootBadge: {
+            name: "Ironroot Badge",
+            description: "Gain 2 defense while below 35% HP."
+          },
+          dawnflask: {
+            name: "Dawnflask",
+            description: "Recover 8 HP the first time each Boss fight begins."
+          },
+          scavengerMap: {
+            name: "Scavenger's Map",
+            description: "Gain 3 extra gold whenever an exploration event grants gold."
+          }
+        },
+        relicSources: {
+          ashGateWarden: "Defeat Ash Gate Warden",
+          altar: "Black Wax Altar event",
+          rotrootAlpha: "Defeat Rotroot Alpha",
+          traveler: "Wounded Traveler event",
+          blackWaxSeer: "Defeat Black Wax Seer",
+          reliquary: "Cracked Reliquary event",
+          supplyCache: "Supply Remnant event"
+        },
+        adventure: {
+          stageGoal: "Advance exploration {count} more times to encounter {bossName}.",
+          bossPending: "{bossName} blocks the exit. Challenge the Boss before exploring deeper.",
+          bossReady: "Boss challenge available",
+          expeditionComplete: "Expedition complete: the black candles in the Old King's Tomb are out. You can review relics, manage inventory, or start a new game.",
+          expeditionCompleteStatus: "Expedition complete"
         },
         actions: {
+          newGame: "New game",
+          continueGame: "Continue",
+          resetProgress: "Reset progress",
           startAdventure: "Start adventure",
           goShop: "Go to shop",
           viewProfile: "View profile",
@@ -1404,6 +1787,8 @@
           exploreCave: "Explore cave",
           goVillage: "Go to village",
           challengeMonster: "Challenge monster",
+          challengeBoss: "Challenge Boss",
+          resolveEvent: "Choose",
           rest: "Return and rest",
           goDeeper: "Go deeper",
           returnAdventure: "Return to adventure",
@@ -1414,7 +1799,13 @@
         },
         main: {
           placeholder: "Damp stone walls swallow your footsteps. Exploration, combat, and recovery will appear here.",
-          guide: "New player guide: enter the story adventure to progress, return to the village to rest when injured, and spend gold at the shop for healing potions."
+          guide: "New player guide: enter the story adventure to progress, return to the village to rest when injured, and spend gold at the shop for healing potions.",
+          saveHeading: "Adventure save",
+          saveEmpty: "No local save yet. Starting an adventure or pressing New game will save automatically.",
+          saveAvailable: "Local save found.",
+          saveLastSaved: "Last saved: {time}",
+          saveVersion: "Save version: v{version}",
+          saveUnknownTime: "Unknown time"
         },
         shop: {
           heading: "Shop",
@@ -1429,6 +1820,7 @@
         },
         profile: {
           maxLevel: "Max level reached",
+          relicSummary: "{count} relics",
           labels: {
             level: "Player level",
             exp: "Current experience",
@@ -1445,7 +1837,70 @@
           heading: "Inventory or item use",
           potionCount: "Black Candle Potion x {count}",
           healRange: "Restores {min} to {max} HP at random",
-          currentHp: "Current HP: {hp} / {maxHp}"
+          currentHp: "Current HP: {hp} / {maxHp}",
+          relicSection: "Relic collection"
+        },
+        events: {
+          altar: {
+            title: "Black Wax Altar",
+            description: "Cold black wax shifts across the altar as if it is still breathing.",
+            safeLabel: "Pray carefully",
+            safeDescription: "Safe: recover a little HP and progress exploration.",
+            riskLabel: "Touch the core",
+            riskDescription: "Risk: take damage, but gain more gold.",
+            resourceLabel: "Offer a potion",
+            resourceDescription: "Spend 1 potion for gold and a stable lead."
+          },
+          chest: {
+            title: "Wax-Sealed Chest",
+            description: "Black wax seals the lid shut, and metal clinks inside.",
+            safeLabel: "Unseal slowly",
+            safeDescription: "Safe: gain a little gold and progress exploration.",
+            riskLabel: "Force it open",
+            riskDescription: "Risk: high reward, or a fight.",
+            resourceLabel: "Pay for the lock",
+            resourceDescription: "Spend 5 gold to gain 1 potion."
+          },
+          fork: {
+            title: "Fork in the Fog",
+            description: "Fog swallows both paths, but an old marker still points one way.",
+            safeLabel: "Take the marked path",
+            safeDescription: "Safe: steadily progress exploration.",
+            riskLabel: "Charge into the unknown",
+            riskDescription: "Risk: may trigger combat.",
+            resourceLabel: "Mark it with blood",
+            resourceDescription: "Spend HP for gold and progress."
+          },
+          traveler: {
+            title: "Wounded Traveler",
+            description: "A traveler lies beside black wax, clutching a crown-marked fragment.",
+            safeLabel: "Escort them back",
+            safeDescription: "Safe: gain 1 potion.",
+            riskLabel: "Follow the cry for help",
+            riskDescription: "Risk: may be an ambush.",
+            resourceLabel: "Give a potion",
+            resourceDescription: "Spend 1 potion for gold and a clue."
+          },
+          reliquary: {
+            title: "Cracked Reliquary",
+            description: "An old reliquary is caught between roots and black wax, with pale gold light leaking from its seam.",
+            safeLabel: "Copy the marks",
+            safeDescription: "Safe: progress exploration and possibly gain a relic that supports Boss fights.",
+            riskLabel: "Pry it open",
+            riskDescription: "Risk: take damage, but gain gold.",
+            resourceLabel: "Repair the mechanism",
+            resourceDescription: "Spend 4 gold to recover HP and progress."
+          },
+          supplyCache: {
+            title: "Supply Remnant",
+            description: "A torn pouch lies beneath a fallen pillar, holding coins, ash, and an old route map.",
+            safeLabel: "Sort the supplies",
+            safeDescription: "Safe: gain gold and progress exploration.",
+            riskLabel: "Overturn the pouch",
+            riskDescription: "Risk: may find more supplies.",
+            resourceLabel: "Trade for marks",
+            resourceDescription: "Spend 1 potion for more gold and route information."
+          }
         },
         combat: {
           heading: "Combat",
@@ -1483,6 +1938,228 @@
       { id: "defend", nameKey: "skills.defend.name", descriptionKey: "skills.defend.description" },
       { id: "burningCurse", nameKey: "skills.burningCurse.name", descriptionKey: "skills.burningCurse.description" }
     ];
+    const RELIC_DEFINITIONS = [
+      {
+        id: "emberCharm",
+        nameKey: "relics.emberCharm.name",
+        descriptionKey: "relics.emberCharm.description",
+        sourceKey: "relicSources.ashGateWarden",
+        bossReward: "ashGateWarden",
+        killHeal: 3
+      },
+      {
+        id: "waxsealedVial",
+        nameKey: "relics.waxsealedVial.name",
+        descriptionKey: "relics.waxsealedVial.description",
+        sourceKey: "relicSources.altar",
+        eventReward: "altar",
+        potionBonus: 5
+      },
+      {
+        id: "shadowTether",
+        nameKey: "relics.shadowTether.name",
+        descriptionKey: "relics.shadowTether.description",
+        sourceKey: "relicSources.rotrootAlpha",
+        bossReward: "rotrootAlpha",
+        shadowFleePenaltyMultiplier: 0.5
+      },
+      {
+        id: "burialCoin",
+        nameKey: "relics.burialCoin.name",
+        descriptionKey: "relics.burialCoin.description",
+        sourceKey: "relicSources.traveler",
+        eventReward: "traveler",
+        preventsFirstGoldLoss: true
+      },
+      {
+        id: "ironrootBadge",
+        nameKey: "relics.ironrootBadge.name",
+        descriptionKey: "relics.ironrootBadge.description",
+        sourceKey: "relicSources.blackWaxSeer",
+        bossReward: "blackWaxSeer",
+        lowHpDefenseBonus: 2,
+        lowHpThreshold: 0.35
+      },
+      {
+        id: "dawnflask",
+        nameKey: "relics.dawnflask.name",
+        descriptionKey: "relics.dawnflask.description",
+        sourceKey: "relicSources.reliquary",
+        eventReward: "reliquary",
+        bossEntryHeal: 8
+      },
+      {
+        id: "scavengerMap",
+        nameKey: "relics.scavengerMap.name",
+        descriptionKey: "relics.scavengerMap.description",
+        sourceKey: "relicSources.supplyCache",
+        eventReward: "supplyCache",
+        eventGoldBonus: 3
+      }
+    ];
+    const RELIC_IDS = new Set(RELIC_DEFINITIONS.map((relic) => relic.id));
+    const MONSTER_ABILITIES = {
+      slime: {
+        attackMultiplier: 0.65,
+        healChance: 30,
+        healMin: 3,
+        healMax: 6
+      },
+      skeleton: {
+        defenseBonus: 3
+      },
+      wolf: {
+        extraStrikeChance: 35,
+        extraStrikeMultiplier: 0.65
+      },
+      shadowBeast: {
+        fleePenaltyMultiplier: 0.7,
+        fleePenaltyMin: 2
+      },
+      blackCandleCultist: {
+        curseChance: 45,
+        curseDamage: 2,
+        curseTurns: 2,
+        defensePenalty: 2
+      }
+    };
+    const STAGE_PROGRESS_THRESHOLDS = [2, 5, 9, 13];
+    const BOSS_DEFINITIONS = [
+      {
+        id: "ashGateWarden",
+        stage: 0,
+        monsterId: "fleshGuard",
+        nameKey: "bosses.ashGateWarden",
+        ability: "skeleton",
+        maxHp: 44,
+        attack: 7,
+        defense: 3,
+        exp: 22,
+        gold: 28,
+        unlockLog: "unlockForest"
+      },
+      {
+        id: "rotrootAlpha",
+        stage: 1,
+        monsterId: "wolf",
+        nameKey: "bosses.rotrootAlpha",
+        ability: "wolf",
+        maxHp: 62,
+        attack: 10,
+        defense: 3,
+        exp: 34,
+        gold: 44,
+        unlockLog: "unlockCave"
+      },
+      {
+        id: "blackWaxSeer",
+        stage: 2,
+        monsterId: "blackCandleCultist",
+        nameKey: "bosses.blackWaxSeer",
+        ability: "blackCandleCultist",
+        maxHp: 80,
+        attack: 12,
+        defense: 4,
+        exp: 50,
+        gold: 62,
+        unlockLog: "unlockTomb"
+      },
+      {
+        id: "oldKingHusk",
+        stage: 3,
+        monsterId: "tombHunter",
+        nameKey: "bosses.oldKingHusk",
+        ability: "shadowBeast",
+        maxHp: 102,
+        attack: 14,
+        defense: 5,
+        exp: 72,
+        gold: 90,
+        unlockLog: "finalBossVictory"
+      }
+    ];
+    const EXPLORATION_EVENT_IDS = ["altar", "chest", "fork", "traveler", "reliquary", "supplyCache"];
+    const BALANCE = Object.freeze({
+      skills: {
+        heavyStrike: { damageMultiplier: 1.55, flatBonus: 3, recoveryTurns: 1 },
+        defend: { damageReduction: 0.62 },
+        burningCurse: { directMultiplier: 0.45, burnMultiplier: 0.42, burnTurns: 2, minBurnDamage: 2 }
+      },
+      monsters: {
+        baseHp: 16,
+        hpPerLevel: 4,
+        hpRandomPerLevel: 2,
+        hpPerStage: 7,
+        baseAttack: 4,
+        attackPerLevelMin: 1,
+        attackPerLevelMax: 2,
+        attackPerStage: 1,
+        baseDefense: 1,
+        defensePerTwoLevels: 1,
+        defensePerTwoStages: 1,
+        strongHpMultiplier: 1.28,
+        strongAttackBonus: 2,
+        strongDefenseBonus: 1
+      },
+      rewards: {
+        normalExpMin: 4,
+        normalExpMax: 8,
+        normalGoldMin: 7,
+        normalGoldMax: 14,
+        expPerStage: 2,
+        goldPerStage: 4,
+        strongMultiplier: 1.35
+      },
+      bosses: {
+        hpPerStage: 6,
+        attackEveryTwoStages: 1
+      },
+      levelUp: {
+        expBase: 18,
+        expPerLevel: 14,
+        attackMin: 1,
+        attackMax: 2,
+        defenseMin: 1,
+        defenseMax: 1,
+        hpMin: 3,
+        hpMax: 5,
+        restoreBase: 5,
+        restoreHpMultiplier: 0.5
+      },
+      events: {
+        altarSafeHeal: 7,
+        altarRiskDamageMin: 3,
+        altarRiskDamageMax: 5,
+        altarRiskGoldMin: 9,
+        altarRiskGoldMax: 15,
+        altarResourceGoldMin: 14,
+        altarResourceGoldMax: 20,
+        chestSafeGoldMin: 6,
+        chestSafeGoldMax: 10,
+        chestRiskCombatChance: 40,
+        chestRiskGoldMin: 14,
+        chestRiskGoldMax: 24,
+        chestResourceCost: 5,
+        forkDamageMin: 2,
+        forkDamageMax: 4,
+        forkGoldMin: 7,
+        forkGoldMax: 12,
+        travelerResourceGoldMin: 14,
+        travelerResourceGoldMax: 22,
+        reliquaryRiskDamageMin: 4,
+        reliquaryRiskDamageMax: 7,
+        reliquaryRiskGoldMin: 12,
+        reliquaryRiskGoldMax: 20,
+        reliquaryResourceCost: 4,
+        reliquaryResourceHeal: 8,
+        supplySafeGoldMin: 7,
+        supplySafeGoldMax: 12,
+        supplyRiskGoldMin: 10,
+        supplyRiskGoldMax: 17,
+        supplyResourceGoldMin: 16,
+        supplyResourceGoldMax: 24
+      }
+    });
     const legacyStoryStatusKeys = {
       "灰烬村入口": "ashVillage",
       "灰燼村入口": "ashVillage",
@@ -1498,36 +2175,46 @@
       "Old King's Tomb": "oldKingsTomb"
     };
 
-    const state = {
-      activeScreen: "main",
-      player: {
-        level: 1,
-        maxLevel: 100,
-        maxHp: 20,
-        hp: 20,
-        attack: 5,
-        defense: 3,
-        exp: 0,
-        gold: 30,
-        potions: 0,
-        skills: SKILL_DEFINITIONS.map((skill) => skill.id),
-        effects: {},
-        relics: []
-      },
-      story: {
-        stage: 0,
-        progress: 0,
-        statusKey: "ashVillage",
-        status: "灰燼村入口",
-        clueFound: false,
-        keyFragment: false
-      },
-      currentMonster: null,
-      combatAnimation: null,
-      combatResolution: null,
-      logs: [],
-      combatLogs: []
-    };
+    function createInitialState() {
+      return {
+        activeScreen: "main",
+        player: {
+          level: 1,
+          maxLevel: 100,
+          maxHp: 20,
+          hp: 20,
+          attack: 5,
+          defense: 3,
+          exp: 0,
+          gold: 30,
+          potions: 0,
+          skills: SKILL_DEFINITIONS.map((skill) => skill.id),
+          effects: {},
+          relics: [],
+          relicStates: {}
+        },
+        story: {
+          stage: 0,
+          progress: 0,
+          statusKey: "ashVillage",
+          status: "灰燼村入口",
+          clueFound: false,
+          keyFragment: false,
+          defeatedBosses: [],
+          activeEvent: null,
+          expeditionComplete: false
+        },
+        currentMonster: null,
+        combatAnimation: null,
+        combatResolution: null,
+        logs: [{ key: "logs.initialGuide", params: {} }],
+        combatLogs: []
+      };
+    }
+
+    const state = createInitialState();
+    let saveMetadata = null;
+    let saveSessionReady = false;
     let combatAnimationTimer = null;
     let combatResolutionTimer = null;
     let logRevision = 0;
@@ -1613,11 +2300,13 @@
     }
 
     function monsterNameParam(monster) {
+      if (monster?.boss && monster.name) {
+        return monster.name;
+      }
+
       const monsterId = normalizeMonsterId(monster);
       return monsterId ? translatedParam(`monsters.${monsterId}`) : monsterName(monster);
     }
-
-    state.logs = [logEntry("logs.initialGuide")];
 
     function setLanguage(language) {
       currentLanguage = sanitizeLanguage(language);
@@ -1635,7 +2324,7 @@
         return 0;
       }
 
-      return 20 + (level - 1) * 15;
+      return BALANCE.levelUp.expBase + (level - 1) * BALANCE.levelUp.expPerLevel;
     }
 
     function experienceText() {
@@ -1648,6 +2337,29 @@
 
     function calculateDamage(attack, defense) {
       return Math.max(1, attack - defense);
+    }
+
+    function monsterAbilityId(monster) {
+      const normalized = normalizeMonsterId(monster);
+      const ability = monster && typeof monster === "object" ? String(monster.ability || "") : "";
+      if (MONSTER_ABILITIES[ability] || ability === "basic") {
+        return ability;
+      }
+
+      return normalized || "basic";
+    }
+
+    function playerEffectiveDefense() {
+      ensurePlayerCombatState();
+      const curse = state.player.effects.blackCandleCurse;
+      const defensePenalty = curse ? Math.max(0, Number(curse.defensePenalty) || 0) : 0;
+      let effectiveDefense = Math.max(0, state.player.defense - defensePenalty);
+
+      if (isLowHpDefenseRelicActive()) {
+        effectiveDefense += relicDefinition("ironrootBadge").lowHpDefenseBonus;
+      }
+
+      return effectiveDefense;
     }
 
     function meter(current, max, kind = "") {
@@ -1677,6 +2389,293 @@
       return stages[currentStageIndex()] || stages[0];
     }
 
+    function ensureStoryProgressState() {
+      if (!Array.isArray(state.story.defeatedBosses)) {
+        state.story.defeatedBosses = [];
+      }
+
+      if (!Object.prototype.hasOwnProperty.call(state.story, "activeEvent")) {
+        state.story.activeEvent = null;
+      }
+
+      if (typeof state.story.expeditionComplete !== "boolean") {
+        state.story.expeditionComplete = false;
+      }
+    }
+
+    function deepClone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function safeNumber(value, fallback, min = 0, max = Number.MAX_SAFE_INTEGER) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) {
+        return fallback;
+      }
+      return clamp(Math.floor(number), min, max);
+    }
+
+    function normalizeLogList(logs, fallback = []) {
+      const source = Array.isArray(logs) ? logs : fallback;
+      return source
+        .filter((entry) => entry && typeof entry === "object" && typeof entry.key === "string")
+        .map((entry) => ({
+          key: String(entry.key),
+          params: entry.params && typeof entry.params === "object" ? deepClone(entry.params) : {},
+          ...(entry.literal ? { literal: true } : {})
+        }))
+        .slice(0, 10);
+    }
+
+    function normalizeLoadedPlayer(rawPlayer = {}) {
+      const defaults = createInitialState().player;
+      const player = {
+        ...defaults,
+        ...(rawPlayer && typeof rawPlayer === "object" ? rawPlayer : {})
+      };
+
+      player.maxLevel = MAX_LEVEL;
+      player.level = safeNumber(player.level, defaults.level, 1, MAX_LEVEL);
+      player.maxHp = safeNumber(player.maxHp, defaults.maxHp, 1, 999);
+      player.hp = safeNumber(player.hp, defaults.hp, 1, player.maxHp);
+      player.attack = safeNumber(player.attack, defaults.attack, 1, 999);
+      player.defense = safeNumber(player.defense, defaults.defense, 0, 999);
+      player.exp = safeNumber(player.exp, defaults.exp, 0, 999999);
+      player.gold = safeNumber(player.gold, defaults.gold, 0, 999999);
+      player.potions = safeNumber(player.potions, defaults.potions, 0, 999);
+
+      const skillIds = new Set(SKILL_DEFINITIONS.map((skill) => skill.id));
+      player.skills = Array.isArray(player.skills)
+        ? [...new Set(player.skills.filter((skillId) => skillIds.has(skillId)))]
+        : defaults.skills;
+      if (!player.skills.length) {
+        player.skills = defaults.skills;
+      }
+
+      player.effects = player.effects && typeof player.effects === "object" && !Array.isArray(player.effects)
+        ? player.effects
+        : {};
+      player.relics = Array.isArray(player.relics)
+        ? [...new Set(player.relics.filter((relicId) => RELIC_IDS.has(relicId)))]
+        : [];
+      player.relicStates = player.relicStates && typeof player.relicStates === "object" && !Array.isArray(player.relicStates)
+        ? player.relicStates
+        : {};
+
+      return player;
+    }
+
+    function normalizeLoadedStory(rawStory = {}) {
+      const defaults = createInitialState().story;
+      const story = {
+        ...defaults,
+        ...(rawStory && typeof rawStory === "object" ? rawStory : {})
+      };
+
+      story.stage = safeNumber(story.stage, defaults.stage, 0, stages.length - 1);
+      story.progress = safeNumber(story.progress, defaults.progress, 0, 999999);
+      const rawStatusKey = rawStory && typeof rawStory === "object" ? rawStory.statusKey : "";
+      const rawStatus = rawStory && typeof rawStory === "object" ? rawStory.status : "";
+      const statusKey = rawStatusKey || legacyStoryStatusKeys[rawStatus] || stages[story.stage]?.id || defaults.statusKey;
+      story.statusKey = stages.some((stage) => stage.id === statusKey) ? statusKey : stages[story.stage].id;
+      story.status = stageText(story.stage, "status");
+      story.clueFound = Boolean(story.clueFound);
+      story.keyFragment = Boolean(story.keyFragment);
+      story.defeatedBosses = Array.isArray(story.defeatedBosses)
+        ? [...new Set(story.defeatedBosses.filter((bossId) => BOSS_DEFINITIONS.some((boss) => boss.id === bossId)))]
+        : [];
+      story.activeEvent = story.activeEvent && EXPLORATION_EVENT_IDS.includes(story.activeEvent.id)
+        ? { id: story.activeEvent.id }
+        : null;
+      story.expeditionComplete = Boolean(story.expeditionComplete);
+
+      return story;
+    }
+
+    function buildSavePayload() {
+      return {
+        saveVersion: SAVE_VERSION,
+        savedAt: new Date().toISOString(),
+        activeScreen: state.activeScreen === "combat" ? "adventure" : state.activeScreen,
+        player: deepClone(state.player),
+        story: deepClone(state.story),
+        logs: normalizeLogList(state.logs)
+      };
+    }
+
+    function canSaveSafeState() {
+      return !isCombatLocked() && state.activeScreen !== "combat";
+    }
+
+    function saveGame() {
+      if (!canSaveSafeState()) {
+        return false;
+      }
+
+      if (!saveSessionReady && saveMetadata) {
+        return false;
+      }
+
+      try {
+        const payload = buildSavePayload();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+        saveMetadata = { saveVersion: payload.saveVersion, savedAt: payload.savedAt };
+        saveSessionReady = true;
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function readSavePayload() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) {
+          saveMetadata = null;
+          saveSessionReady = true;
+          return null;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") {
+          saveMetadata = null;
+          saveSessionReady = true;
+          return null;
+        }
+
+        const rawSaveVersion = safeNumber(parsed.saveVersion, 0, 0, Number.MAX_SAFE_INTEGER);
+        saveMetadata = {
+          saveVersion: rawSaveVersion,
+          savedAt: typeof parsed.savedAt === "string" ? parsed.savedAt : ""
+        };
+        saveSessionReady = false;
+        return parsed;
+      } catch (error) {
+        saveMetadata = null;
+        saveSessionReady = true;
+        return null;
+      }
+    }
+
+    function replaceState(nextState) {
+      Object.keys(state).forEach((key) => {
+        delete state[key];
+      });
+      Object.assign(state, nextState);
+    }
+
+    function loadGame({ announce = true } = {}) {
+      const payload = readSavePayload();
+      if (!payload) {
+        return false;
+      }
+
+      const payloadVersion = safeNumber(payload.saveVersion, 0, 0, Number.MAX_SAFE_INTEGER);
+      if (payloadVersion > SAVE_VERSION) {
+        if (announce) {
+          addLog("logs.saveNewerVersion", { version: payloadVersion, currentVersion: SAVE_VERSION });
+          render();
+        }
+        return false;
+      }
+
+      const defaults = createInitialState();
+      const loadedState = {
+        ...defaults,
+        activeScreen: SCREENS[payload.activeScreen] && payload.activeScreen !== "combat" ? payload.activeScreen : "main",
+        player: normalizeLoadedPlayer(payload.player),
+        story: normalizeLoadedStory(payload.story),
+        currentMonster: null,
+        combatAnimation: null,
+        combatResolution: null,
+        logs: normalizeLogList(payload.logs, defaults.logs),
+        combatLogs: []
+      };
+
+      replaceState(loadedState);
+      saveSessionReady = true;
+      ensurePlayerCombatState();
+      ensureStoryProgressState();
+
+      if (announce) {
+        addLog("logs.saveLoaded");
+      }
+
+      saveGame();
+      render();
+      return true;
+    }
+
+    function startNewGame() {
+      replaceState(createInitialState());
+      saveSessionReady = true;
+      addLog("logs.newGameStarted");
+      saveGame();
+      render();
+    }
+
+    function resetProgress() {
+      replaceState(createInitialState());
+      saveMetadata = null;
+      saveSessionReady = true;
+      try {
+        localStorage.removeItem(SAVE_KEY);
+      } catch (error) {
+        // Reset should still update the in-memory game state when storage is blocked.
+      }
+      addLog("logs.progressReset");
+      render();
+    }
+
+    function continueGame() {
+      loadGame({ announce: true });
+    }
+
+    function hasUnloadedSave() {
+      return Boolean(saveMetadata && !saveSessionReady);
+    }
+
+    function loadExistingSaveBeforeAction() {
+      if (!hasUnloadedSave()) {
+        return true;
+      }
+
+      return loadGame({ announce: true });
+    }
+
+    function bossDefinitionForStage(stageIndex = currentStageIndex()) {
+      return BOSS_DEFINITIONS.find((boss) => boss.stage === stageIndex) || null;
+    }
+
+    function hasDefeatedBoss(bossId) {
+      ensureStoryProgressState();
+      return state.story.defeatedBosses.includes(bossId);
+    }
+
+    function pendingBossDefinition() {
+      ensureStoryProgressState();
+      const boss = bossDefinitionForStage();
+      const threshold = STAGE_PROGRESS_THRESHOLDS[currentStageIndex()] ?? Infinity;
+
+      if (!boss || hasDefeatedBoss(boss.id) || state.story.progress < threshold) {
+        return null;
+      }
+
+      return boss;
+    }
+
+    function bossNameParam(boss) {
+      return translatedParam(boss.nameKey);
+    }
+
+    function bossDisplayName(boss) {
+      return boss ? t(boss.nameKey) : t("common.unknownArea");
+    }
+
+    function adventureEventTitleParam(eventId) {
+      return translatedParam(`events.${eventId}.title`);
+    }
+
     function stageText(stageIndex, field) {
       const rawStage = Number(stageIndex);
       const safeStage = Number.isFinite(rawStage) ? Math.floor(rawStage) : 0;
@@ -1685,9 +2684,34 @@
     }
 
     function currentStoryStatus() {
+      if (state.story.expeditionComplete) {
+        return t("adventure.expeditionCompleteStatus");
+      }
+
       const candidateStatusKey = state.story.statusKey || legacyStoryStatusKeys[state.story.status] || currentStage().id;
       const statusKey = stages.some((stage) => stage.id === candidateStatusKey) ? candidateStatusKey : currentStage().id;
       return t(`stages.${statusKey}.status`);
+    }
+
+    function adventureGoalText() {
+      ensureStoryProgressState();
+
+      if (state.story.expeditionComplete) {
+        return t("adventure.expeditionComplete");
+      }
+
+      const boss = pendingBossDefinition();
+      if (boss) {
+        return t("adventure.bossPending", { bossName: bossDisplayName(boss) });
+      }
+
+      const nextBoss = bossDefinitionForStage();
+      const threshold = STAGE_PROGRESS_THRESHOLDS[currentStageIndex()] ?? 0;
+      const remaining = Math.max(1, threshold - state.story.progress);
+      return t("adventure.stageGoal", {
+        count: remaining,
+        bossName: bossDisplayName(nextBoss)
+      });
     }
 
     function currentSceneAsset() {
@@ -1711,6 +2735,10 @@
     }
 
     function monsterName(monster) {
+      if (monster?.boss && monster.name) {
+        return String(monster.name);
+      }
+
       const monsterId = normalizeMonsterId(monster);
       if (monsterId) {
         return t(`monsters.${monsterId}`);
@@ -1802,19 +2830,19 @@
 
     function addLog(key, params = {}) {
       state.logs.unshift(logEntry(key, params));
-      state.logs = state.logs.slice(0, 8);
+      state.logs = state.logs.slice(0, 10);
       logRevision += 1;
     }
 
     function addLiteralLog(message) {
       state.logs.unshift(literalLogEntry(message));
-      state.logs = state.logs.slice(0, 8);
+      state.logs = state.logs.slice(0, 10);
       logRevision += 1;
     }
 
     function addCombatLog(key, params = {}) {
       state.combatLogs.push(logEntry(key, params));
-      state.combatLogs = state.combatLogs.slice(-8);
+      state.combatLogs = state.combatLogs.slice(-10);
       combatLogRevision += 1;
     }
 
@@ -1878,6 +2906,147 @@
       if (!Array.isArray(state.player.relics)) {
         state.player.relics = [];
       }
+
+      state.player.relics = [...new Set(state.player.relics.filter((relicId) => RELIC_IDS.has(relicId)))];
+
+      if (!state.player.relicStates || typeof state.player.relicStates !== "object") {
+        state.player.relicStates = {};
+      }
+    }
+
+    function relicDefinition(relicId) {
+      return RELIC_DEFINITIONS.find((relic) => relic.id === relicId) || null;
+    }
+
+    function hasRelic(relicId) {
+      ensurePlayerCombatState();
+      return state.player.relics.includes(relicId);
+    }
+
+    function relicNameParam(relicId) {
+      const relic = relicDefinition(relicId);
+      return translatedParam(relic ? relic.nameKey : "relics.empty");
+    }
+
+    function isLowHpDefenseRelicActive() {
+      if (!hasRelic("ironrootBadge")) {
+        return false;
+      }
+
+      const relic = relicDefinition("ironrootBadge");
+      const threshold = Math.max(1, Math.floor(state.player.maxHp * relic.lowHpThreshold));
+      return state.player.hp <= threshold;
+    }
+
+    function relicStatusLabel(relic) {
+      if (relic.preventsFirstGoldLoss && state.player.relicStates?.burialCoinSpent) {
+        return t("relics.used");
+      }
+
+      if (relic.lowHpDefenseBonus && isLowHpDefenseRelicActive()) {
+        return t("relics.active");
+      }
+
+      if (relic.bossEntryHeal && Array.isArray(state.player.relicStates?.dawnflaskBosses) && state.player.relicStates.dawnflaskBosses.length) {
+        return t("relics.used");
+      }
+
+      return "";
+    }
+
+    function grantRelic(relicId, logKey = "logs.relicFound") {
+      ensurePlayerCombatState();
+      const relic = relicDefinition(relicId);
+
+      if (!relic || hasRelic(relic.id)) {
+        return false;
+      }
+
+      state.player.relics.push(relic.id);
+      audioController.playSfx("discovery");
+      addLog(logKey, { relicName: relicNameParam(relic.id) });
+      saveGame();
+      return true;
+    }
+
+    function grantEventRelic(eventId) {
+      const relic = RELIC_DEFINITIONS.find((item) => item.eventReward === eventId);
+      return relic ? grantRelic(relic.id) : false;
+    }
+
+    function grantBossRelic(bossId) {
+      const relic = RELIC_DEFINITIONS.find((item) => item.bossReward === bossId);
+      return relic ? grantRelic(relic.id, "logs.relicBossReward") : false;
+    }
+
+    function applyExplorationGold(baseGold) {
+      let gold = baseGold;
+
+      if (hasRelic("scavengerMap")) {
+        const relic = relicDefinition("scavengerMap");
+        gold += relic.eventGoldBonus;
+        addLog("logs.relicEventGold", {
+          relicName: relicNameParam(relic.id),
+          amount: relic.eventGoldBonus
+        });
+      }
+
+      state.player.gold += gold;
+      return gold;
+    }
+
+    function triggerBossEntryRelic(boss) {
+      if (!boss || !hasRelic("dawnflask") || state.player.hp >= state.player.maxHp) {
+        return;
+      }
+
+      const relic = relicDefinition("dawnflask");
+      const usedBosses = Array.isArray(state.player.relicStates.dawnflaskBosses)
+        ? state.player.relicStates.dawnflaskBosses
+        : [];
+
+      if (usedBosses.includes(boss.id)) {
+        return;
+      }
+
+      const healed = Math.min(relic.bossEntryHeal, state.player.maxHp - state.player.hp);
+      state.player.hp += healed;
+      state.player.relicStates.dawnflaskBosses = [...usedBosses, boss.id];
+      addCombatLog("combatLogs.relicBossEntryHeal", { relicName: relicNameParam(relic.id), amount: healed });
+      addLog("logs.relicBossEntryHeal", { relicName: relicNameParam(relic.id), amount: healed });
+    }
+
+    function renderRelicList() {
+      ensurePlayerCombatState();
+
+      if (!state.player.relics.length) {
+        return `<p class="muted">${escapeHtml(t("relics.empty"))}</p>`;
+      }
+
+      return `
+        <div class="relic-grid">
+          ${state.player.relics.map((relicId) => {
+            const relic = relicDefinition(relicId);
+            if (!relic) {
+              return "";
+            }
+
+            const status = relicStatusLabel(relic);
+            const source = relic.sourceKey ? t("relics.source", { source: t(relic.sourceKey) }) : "";
+
+            return `
+              <article class="relic-card">
+                <h3>${escapeHtml(t(relic.nameKey))}${status ? ` <span class="muted">(${escapeHtml(status)})</span>` : ""}</h3>
+                <p>${escapeHtml(t(relic.descriptionKey))}</p>
+                <div class="relic-meta">
+                  ${source ? `<span class="relic-tag">${escapeHtml(source)}</span>` : ""}
+                  ${status ? `<span class="relic-tag ${status === t("relics.active") ? "active" : ""}">${escapeHtml(status)}</span>` : ""}
+                </div>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      `;
     }
 
     function ensureMonsterCombatState(monster) {
@@ -1885,12 +3054,28 @@
         return;
       }
 
+      monster.boss = Boolean(monster.boss || monster.bossId || monster.source === "boss");
+
       if (!monster.ability) {
         monster.ability = normalizeMonsterId(monster) || "basic";
       }
 
-      if (!monster.statusEffects || typeof monster.statusEffects !== "object") {
+      if (!monster.statusEffects || typeof monster.statusEffects !== "object" || Array.isArray(monster.statusEffects)) {
         monster.statusEffects = {};
+      }
+
+      if (!monster.abilityStatsApplied) {
+        const ability = monsterAbilityId(monster);
+        const config = MONSTER_ABILITIES[ability];
+
+        if (ability === "slime") {
+          monster.attack = Math.max(1, Math.floor(monster.attack * config.attackMultiplier));
+        } else if (ability === "skeleton") {
+          monster.defense += config.defenseBonus;
+        }
+
+        monster.ability = ability;
+        monster.abilityStatsApplied = true;
       }
     }
 
@@ -1964,6 +3149,26 @@
       return monster.hp <= 0;
     }
 
+    function applyPlayerStatusEffects() {
+      ensurePlayerCombatState();
+      const curse = state.player.effects.blackCandleCurse;
+
+      if (!curse || state.player.hp <= 0) {
+        return false;
+      }
+
+      const damage = Math.max(1, Number(curse.damage) || 1);
+      state.player.hp = Math.max(0, state.player.hp - damage);
+      addCombatLog("combatLogs.cultistCurseTick", { damage });
+      curse.turns -= 1;
+
+      if (curse.turns <= 0) {
+        delete state.player.effects.blackCandleCurse;
+      }
+
+      return state.player.hp <= 0;
+    }
+
     function playerEffectLabels() {
       ensurePlayerCombatState();
       const labels = [];
@@ -1974,6 +3179,21 @@
 
       if (state.player.effects.heavyRecovering) {
         labels.push(t("effects.heavyRecovering"));
+      }
+
+      if (state.player.effects.blackCandleCurse) {
+        const curse = state.player.effects.blackCandleCurse;
+        labels.push(t("effects.blackCandleCurse", {
+          turns: curse.turns,
+          defensePenalty: curse.defensePenalty
+        }));
+      }
+
+      if (isLowHpDefenseRelicActive()) {
+        labels.push(t("effects.lowHpDefense", {
+          relicName: relicNameParam("ironrootBadge"),
+          amount: relicDefinition("ironrootBadge").lowHpDefenseBonus
+        }));
       }
 
       return labels;
@@ -2277,6 +3497,11 @@
         return;
       }
 
+      if (screen !== "main" && hasUnloadedSave()) {
+        loadExistingSaveBeforeAction();
+        return;
+      }
+
       if (screen !== "combat" && isCombatLocked()) {
         state.activeScreen = "combat";
         addCombatLog("combatLogs.combatLocked");
@@ -2285,38 +3510,20 @@
       }
 
       state.activeScreen = screen;
+      saveGame();
       render();
     }
 
     function advanceStory(reasonKey, params = {}) {
+      ensureStoryProgressState();
+      const existingBoss = pendingBossDefinition();
+      if (existingBoss) {
+        addLog("logs.bossBlocks", { bossName: bossNameParam(existingBoss) });
+        saveGame();
+        return;
+      }
+
       state.story.progress += 1;
-
-      if (state.story.stage === 0 && state.story.progress >= 2) {
-        state.story.stage = 1;
-        state.story.statusKey = "rottenForest";
-        state.story.status = "腐爛森林";
-        audioController.playSfx("discovery");
-        addLog("logs.unlockForest");
-        return;
-      }
-
-      if (state.story.stage === 1 && state.story.progress >= 5) {
-        state.story.stage = 2;
-        state.story.statusKey = "dampCave";
-        state.story.status = "潮濕洞穴";
-        audioController.playSfx("discovery");
-        addLog("logs.unlockCave");
-        return;
-      }
-
-      if (state.story.stage === 2 && state.story.progress >= 9) {
-        state.story.stage = 3;
-        state.story.statusKey = "oldKingsTomb";
-        state.story.status = "舊王墓穴";
-        audioController.playSfx("discovery");
-        addLog("logs.unlockTomb");
-        return;
-      }
 
       if (reasonKey) {
         if (reasonKey.startsWith("special")) {
@@ -2328,17 +3535,54 @@
           addLog(`logs.${reasonKey}`, params);
         }
       }
+
+      const boss = pendingBossDefinition();
+      if (boss) {
+        audioController.playSfx("discovery");
+        addLog("logs.bossAppears", { bossName: bossNameParam(boss) });
+        saveGame();
+        return;
+      }
+
+      saveGame();
+    }
+
+    function unlockStageAfterBoss(boss) {
+      ensureStoryProgressState();
+
+      if (!hasDefeatedBoss(boss.id)) {
+        state.story.defeatedBosses.push(boss.id);
+      }
+
+      if (boss.stage < stages.length - 1) {
+        const nextStageIndex = boss.stage + 1;
+        const nextStage = stages[nextStageIndex];
+        state.story.stage = nextStageIndex;
+        state.story.statusKey = nextStage.id;
+        state.story.status = stageText(nextStageIndex, "status");
+        audioController.playSfx("discovery");
+        addLog(`logs.${boss.unlockLog}`);
+        saveGame();
+        return;
+      }
+
+      state.story.expeditionComplete = true;
+      audioController.playSfx("discovery");
+      addLog("logs.finalBossVictory");
+      saveGame();
     }
 
     function gainGold(amount, reasonKey) {
       state.player.gold += amount;
       audioController.playSfx("gold");
       addLog("logs.gainGold", { reason: translatedParam(`logReasons.${reasonKey}`), amount });
+      saveGame();
     }
 
     function gainPotion(reasonKey) {
       state.player.potions += 1;
       addLog("logs.gainPotion", { reason: translatedParam(`logReasons.${reasonKey}`) });
+      saveGame();
     }
 
     function restAtVillage() {
@@ -2354,9 +3598,216 @@
       }
 
       state.activeScreen = "adventure";
+      saveGame();
+    }
+
+    function chooseExplorationEvent() {
+      const eventId = EXPLORATION_EVENT_IDS[rand(0, EXPLORATION_EVENT_IDS.length - 1)];
+      state.story.activeEvent = { id: eventId };
+      addLog("logs.eventFound", { eventName: adventureEventTitleParam(eventId) });
+      saveGame();
+    }
+
+    function advanceEventProgress(reasonKey, params = {}) {
+      const eventId = state.story.activeEvent?.id;
+      state.story.activeEvent = null;
+      advanceStory(reasonKey, params);
+      grantEventRelic(eventId);
+      saveGame();
+    }
+
+    function damagePlayer(amount) {
+      const damage = Math.max(1, amount);
+      state.player.hp = Math.max(1, state.player.hp - damage);
+      return damage;
+    }
+
+    function resolveExplorationEvent(eventId, choice) {
+      const event = state.story.activeEvent;
+
+      if (!event || event.id !== eventId) {
+        chooseExplorationEvent();
+        render();
+        return;
+      }
+
+      if (eventId === "altar") {
+        if (choice === "safe") {
+          const healed = Math.min(BALANCE.events.altarSafeHeal, state.player.maxHp - state.player.hp);
+          state.player.hp += healed;
+          advanceEventProgress("eventAltarSafe", { amount: healed });
+          return;
+        }
+
+        if (choice === "risk") {
+          const damage = damagePlayer(rand(BALANCE.events.altarRiskDamageMin, BALANCE.events.altarRiskDamageMax));
+          const gold = applyExplorationGold(rand(BALANCE.events.altarRiskGoldMin, BALANCE.events.altarRiskGoldMax));
+          advanceEventProgress("eventAltarRisk", { damage, gold });
+          return;
+        }
+
+        if (state.player.potions <= 0) {
+          addLog("logs.eventNoPotion");
+          return;
+        }
+
+        state.player.potions -= 1;
+        const gold = applyExplorationGold(rand(BALANCE.events.altarResourceGoldMin, BALANCE.events.altarResourceGoldMax));
+        advanceEventProgress("eventAltarResource", { gold });
+        return;
+      }
+
+      if (eventId === "chest") {
+        if (choice === "safe") {
+          const gold = applyExplorationGold(rand(BALANCE.events.chestSafeGoldMin, BALANCE.events.chestSafeGoldMax));
+          advanceEventProgress("eventChestSafe", { gold });
+          return;
+        }
+
+        if (choice === "risk") {
+          if (rand(1, 100) <= BALANCE.events.chestRiskCombatChance) {
+            state.story.activeEvent = null;
+            addLog("logs.eventChestRiskCombat");
+            startCombat(true, "event", eventId);
+            return;
+          }
+
+          const gold = applyExplorationGold(rand(BALANCE.events.chestRiskGoldMin, BALANCE.events.chestRiskGoldMax));
+          advanceEventProgress("eventChestRiskGold", { gold });
+          return;
+        }
+
+        const cost = BALANCE.events.chestResourceCost;
+        if (state.player.gold < cost) {
+          addLog("logs.eventNoGold");
+          return;
+        }
+
+        state.player.gold -= cost;
+        state.player.potions += 1;
+        advanceEventProgress("eventChestResource", { cost });
+        return;
+      }
+
+      if (eventId === "fork") {
+        if (choice === "safe") {
+          advanceEventProgress("eventForkSafe");
+          return;
+        }
+
+        if (choice === "risk") {
+          state.story.activeEvent = null;
+          addLog("logs.eventForkRisk");
+          startCombat(false, "event", eventId);
+          return;
+        }
+
+        const damage = damagePlayer(rand(BALANCE.events.forkDamageMin, BALANCE.events.forkDamageMax));
+        const gold = applyExplorationGold(rand(BALANCE.events.forkGoldMin, BALANCE.events.forkGoldMax));
+        advanceEventProgress("eventForkResource", { damage, gold });
+        return;
+      }
+
+      if (eventId === "traveler") {
+        if (choice === "safe") {
+          state.player.potions += 1;
+          advanceEventProgress("eventTravelerSafe");
+          return;
+        }
+
+        if (choice === "risk") {
+          state.story.activeEvent = null;
+          addLog("logs.eventTravelerRisk");
+          startCombat(false, "event", eventId);
+          return;
+        }
+
+        if (state.player.potions <= 0) {
+          addLog("logs.eventNoPotion");
+          return;
+        }
+
+        state.player.potions -= 1;
+        const gold = applyExplorationGold(rand(BALANCE.events.travelerResourceGoldMin, BALANCE.events.travelerResourceGoldMax));
+        state.story.keyFragment = true;
+        advanceEventProgress("eventTravelerResource", { gold });
+        return;
+      }
+
+      if (eventId === "reliquary") {
+        if (choice === "safe") {
+          advanceEventProgress("eventReliquarySafe");
+          return;
+        }
+
+        if (choice === "risk") {
+          const damage = damagePlayer(rand(BALANCE.events.reliquaryRiskDamageMin, BALANCE.events.reliquaryRiskDamageMax));
+          const gold = applyExplorationGold(rand(BALANCE.events.reliquaryRiskGoldMin, BALANCE.events.reliquaryRiskGoldMax));
+          advanceEventProgress("eventReliquaryRisk", { damage, gold });
+          return;
+        }
+
+        const cost = BALANCE.events.reliquaryResourceCost;
+        if (state.player.gold < cost) {
+          addLog("logs.eventNoGold");
+          return;
+        }
+
+        state.player.gold -= cost;
+        const amount = Math.min(BALANCE.events.reliquaryResourceHeal, state.player.maxHp - state.player.hp);
+        state.player.hp += amount;
+        advanceEventProgress("eventReliquaryResource", { cost, amount });
+        return;
+      }
+
+      if (eventId === "supplyCache") {
+        if (choice === "safe") {
+          const gold = applyExplorationGold(rand(BALANCE.events.supplySafeGoldMin, BALANCE.events.supplySafeGoldMax));
+          advanceEventProgress("eventSupplyCacheSafe", { gold });
+          return;
+        }
+
+        if (choice === "risk") {
+          const gold = applyExplorationGold(rand(BALANCE.events.supplyRiskGoldMin, BALANCE.events.supplyRiskGoldMax));
+          state.player.potions += 1;
+          advanceEventProgress("eventSupplyCacheRisk", { gold });
+          return;
+        }
+
+        if (state.player.potions <= 0) {
+          addLog("logs.eventNoPotion");
+          return;
+        }
+
+        state.player.potions -= 1;
+        const gold = applyExplorationGold(rand(BALANCE.events.supplyResourceGoldMin, BALANCE.events.supplyResourceGoldMax));
+        advanceEventProgress("eventSupplyCacheResource", { gold });
+      }
+    }
+
+    function handleExplorationEventChoice(eventId, choice) {
+      resolveExplorationEvent(eventId, choice);
+
+      if (state.activeScreen !== "combat") {
+        render();
+      }
     }
 
     function resolveAdventureEvent(source) {
+      ensureStoryProgressState();
+
+      if (state.story.expeditionComplete && source !== "village") {
+        addLog("logs.expeditionComplete");
+        saveGame();
+        return;
+      }
+
+      const boss = pendingBossDefinition();
+      if (boss && source !== "challengeBoss" && source !== "village") {
+        addLog("logs.bossBlocks", { bossName: bossNameParam(boss) });
+        return;
+      }
+
       if (source === "village") {
         const event = rand(1, 3);
 
@@ -2370,6 +3821,17 @@
         }
 
         advanceStory();
+        return;
+      }
+
+      if (source === "challengeBoss") {
+        startBossCombat();
+        return;
+      }
+
+      if (source === "challenge") {
+        state.story.activeEvent = null;
+        startCombat(true, "challenge");
         return;
       }
 
@@ -2389,43 +3851,11 @@
         return;
       }
 
-      const roll = rand(1, 100);
-
-      if (roll <= 34) {
-        startCombat(false, source);
+      if (state.story.activeEvent) {
         return;
       }
 
-      if (roll <= 52) {
-        startCombat(true, source);
-        return;
-      }
-
-      if (roll <= 70) {
-        gainGold(rand(6, 14), "oldCoinPurse");
-        advanceStory();
-        return;
-      }
-
-      if (roll <= 84) {
-        gainPotion("driedBloodTrail");
-        advanceStory();
-        return;
-      }
-
-      if (state.story.stage >= 2) {
-        state.story.keyFragment = true;
-        advanceStory("specialKingMark");
-        return;
-      }
-
-      if (state.story.stage >= 1) {
-        state.story.clueFound = true;
-        advanceStory("specialCaveCipher");
-        return;
-      }
-
-      advanceStory("distantBell");
+      chooseExplorationEvent();
     }
 
     function handleAdventureChoice(choice) {
@@ -2440,27 +3870,33 @@
       }
     }
 
-    function generateMonster(strong = false, source = "wild") {
+    function generateMonster(strong = false, source = "wild", eventId = null) {
       const playerLevel = state.player.level;
-      let attack = 5;
-      let defense = 2;
+      const stageIndex = currentStageIndex();
+      const balance = BALANCE.monsters;
+      let attack = balance.baseAttack + stageIndex * balance.attackPerStage;
+      let defense = balance.baseDefense
+        + Math.floor((playerLevel - 1) / 2) * balance.defensePerTwoLevels
+        + Math.floor(stageIndex / 2) * balance.defensePerTwoStages;
 
       for (let level = 2; level <= playerLevel; level += 1) {
-        attack += rand(1, 4);
-        defense += rand(1, 4);
+        attack += rand(balance.attackPerLevelMin, balance.attackPerLevelMax);
       }
 
-      let maxHp = 14 + playerLevel * 5 + rand(0, playerLevel * 3);
+      let maxHp = balance.baseHp
+        + playerLevel * balance.hpPerLevel
+        + rand(0, playerLevel * balance.hpRandomPerLevel)
+        + stageIndex * balance.hpPerStage;
 
       if (strong) {
-        maxHp = Math.ceil(maxHp * 1.35);
-        attack += 2;
-        defense += 1;
+        maxHp = Math.ceil(maxHp * balance.strongHpMultiplier);
+        attack += balance.strongAttackBonus;
+        defense += balance.strongDefenseBonus;
       }
 
       const monsterId = monsterIds[rand(0, monsterIds.length - 1)];
 
-      return {
+      const monster = {
         monsterId,
         name: t(`monsters.${monsterId}`),
         maxHp,
@@ -2470,11 +3906,38 @@
         ability: monsterId,
         statusEffects: {},
         strong,
-        source
+        boss: false,
+        source,
+        eventId
       };
+      ensureMonsterCombatState(monster);
+      return monster;
     }
 
-    function startCombat(strong = false, source = "wild") {
+    function createBossMonster(boss) {
+      const hpStageScale = boss.stage * BALANCE.bosses.hpPerStage;
+      const attackStageScale = Math.floor(boss.stage / 2) * BALANCE.bosses.attackEveryTwoStages;
+      const monster = {
+        monsterId: boss.monsterId,
+        name: t(boss.nameKey),
+        maxHp: boss.maxHp + hpStageScale,
+        hp: boss.maxHp + hpStageScale,
+        attack: boss.attack + attackStageScale,
+        defense: boss.defense,
+        ability: boss.ability,
+        statusEffects: {},
+        strong: true,
+        boss: true,
+        bossId: boss.id,
+        expReward: boss.exp,
+        goldReward: boss.gold,
+        source: "boss"
+      };
+      ensureMonsterCombatState(monster);
+      return monster;
+    }
+
+    function startCombat(strong = false, source = "wild", eventId = null) {
       if (hasActiveCombat()) {
         state.activeScreen = "combat";
         render();
@@ -2483,7 +3946,7 @@
 
       clearCombatTimers();
       clearCombatEffects();
-      const monster = generateMonster(strong, source);
+      const monster = generateMonster(strong, source, eventId);
       ensureMonsterCombatState(monster);
       state.currentMonster = monster;
       state.combatLogs = [];
@@ -2491,6 +3954,35 @@
         enemyType: translatedParam(monster.strong ? "combatLogs.strongEnemy" : "combatLogs.enemy"),
         monsterName: monsterNameParam(monster)
       });
+      state.activeScreen = "combat";
+      render();
+    }
+
+    function startBossCombat() {
+      const boss = pendingBossDefinition();
+
+      if (!boss) {
+        resolveAdventureEvent("challenge");
+        return;
+      }
+
+      if (hasActiveCombat()) {
+        state.activeScreen = "combat";
+        render();
+        return;
+      }
+
+      clearCombatTimers();
+      clearCombatEffects();
+      state.story.activeEvent = null;
+      const monster = createBossMonster(boss);
+      state.currentMonster = monster;
+      state.combatLogs = [];
+      addCombatLog("combatLogs.combatStart", {
+        enemyType: translatedParam("combatLogs.strongEnemy"),
+        monsterName: monsterNameParam(monster)
+      });
+      triggerBossEntryRelic(boss);
       state.activeScreen = "combat";
       render();
     }
@@ -2527,22 +4019,24 @@
       let usesHurtAnimation = false;
 
       if (skill.id === "heavyStrike") {
-        damage = calculateDamage(Math.ceil(state.player.attack * 1.7) + 2, monster.defense);
+        const config = BALANCE.skills.heavyStrike;
+        damage = calculateDamage(Math.ceil(state.player.attack * config.damageMultiplier) + config.flatBonus, monster.defense);
         monster.hp = Math.max(0, monster.hp - damage);
-        state.player.effects.heavyRecovering = { turns: 1 };
+        state.player.effects.heavyRecovering = { turns: config.recoveryTurns };
         usesHurtAnimation = true;
         audioController.playSfx("playerAttack");
         audioController.playSfx("criticalHit");
         addCombatLog("combatLogs.heavyStrike", { monsterName: monsterNameParam(monster), damage });
       } else if (skill.id === "defend") {
-        state.player.effects.guarded = { reduction: 0.55 };
+        state.player.effects.guarded = { reduction: BALANCE.skills.defend.damageReduction };
         addCombatLog("combatLogs.defend");
       } else if (skill.id === "burningCurse") {
-        damage = calculateDamage(Math.ceil(state.player.attack * 0.45), monster.defense);
+        const config = BALANCE.skills.burningCurse;
+        damage = calculateDamage(Math.ceil(state.player.attack * config.directMultiplier), monster.defense);
         monster.hp = Math.max(0, monster.hp - damage);
         monster.statusEffects.burn = {
-          turns: 2,
-          damage: Math.max(2, Math.ceil(state.player.attack * 0.45))
+          turns: config.burnTurns,
+          damage: Math.max(config.minBurnDamage, Math.ceil(state.player.attack * config.burnMultiplier))
         };
         usesHurtAnimation = true;
         audioController.playSfx("playerAttack");
@@ -2572,22 +4066,20 @@
           return;
         }
 
+        const statusDefeatedPlayer = applyPlayerStatusEffects();
+        if (statusDefeatedPlayer) {
+          handleDefeat();
+          return;
+        }
+
         monsterAttack();
       }, usesHurtAnimation ? MONSTER_ANIMATION_DURATIONS.hurt : 160);
       render();
     }
 
-    function monsterAttack() {
+    function applyMonsterDamage(rawAttack, logKey = "combatLogs.monsterCounter") {
       const monster = state.currentMonster;
-
-      if (!monster || monster.hp <= 0) {
-        return;
-      }
-
-      ensurePlayerCombatState();
-      ensureMonsterCombatState(monster);
-      setCombatAnimation("attack");
-      const baseDamage = calculateDamage(monster.attack, state.player.defense);
+      const baseDamage = calculateDamage(rawAttack, playerEffectiveDefense());
       let damage = baseDamage;
 
       if (state.player.effects.guarded) {
@@ -2604,7 +4096,51 @@
       state.player.hp = Math.max(0, state.player.hp - damage);
       audioController.playSfx("monsterAttack");
       audioController.playSfx("playerHit");
-      addCombatLog("combatLogs.monsterCounter", { monsterName: monsterNameParam(monster), damage });
+      addCombatLog(logKey, { monsterName: monsterNameParam(monster), damage });
+      return damage;
+    }
+
+    function monsterAttack() {
+      const monster = state.currentMonster;
+
+      if (!monster || monster.hp <= 0) {
+        return;
+      }
+
+      ensurePlayerCombatState();
+      ensureMonsterCombatState(monster);
+      setCombatAnimation("attack");
+      const ability = monsterAbilityId(monster);
+      const config = MONSTER_ABILITIES[ability] || {};
+
+      if (ability === "slime" && monster.hp < monster.maxHp && rand(1, 100) <= config.healChance) {
+        const healed = Math.min(rand(config.healMin, config.healMax), monster.maxHp - monster.hp);
+        if (healed > 0) {
+          monster.hp += healed;
+          addCombatLog("combatLogs.slimeHeal", { monsterName: monsterNameParam(monster), amount: healed });
+        }
+      }
+
+      applyMonsterDamage(monster.attack);
+
+      if (state.player.hp > 0 && ability === "wolf" && rand(1, 100) <= config.extraStrikeChance) {
+        applyMonsterDamage(Math.ceil(monster.attack * config.extraStrikeMultiplier), "combatLogs.wolfDoubleStrike");
+      }
+
+      if (
+        state.player.hp > 0 &&
+        ability === "blackCandleCultist" &&
+        !state.player.effects.blackCandleCurse &&
+        rand(1, 100) <= config.curseChance
+      ) {
+        state.player.effects.blackCandleCurse = {
+          turns: config.curseTurns,
+          damage: config.curseDamage,
+          defensePenalty: config.defensePenalty
+        };
+        addCombatLog("combatLogs.cultistCurse", { monsterName: monsterNameParam(monster) });
+      }
+
       reducePlayerTurnEffects();
 
       if (state.player.hp <= 0) {
@@ -2619,9 +4155,15 @@
         return;
       }
 
-      const multiplier = monster.strong ? 1.5 : 1;
-      const expReward = Math.ceil(rand(2, 10) * multiplier);
-      const goldReward = Math.ceil(rand(5, 20) * multiplier);
+      const boss = monster.bossId ? BOSS_DEFINITIONS.find((item) => item.id === monster.bossId) : null;
+      const multiplier = monster.strong && !boss ? BALANCE.rewards.strongMultiplier : 1;
+      const stageIndex = currentStageIndex();
+      const expReward = boss
+        ? monster.expReward
+        : Math.ceil((rand(BALANCE.rewards.normalExpMin, BALANCE.rewards.normalExpMax) + stageIndex * BALANCE.rewards.expPerStage) * multiplier);
+      const goldReward = boss
+        ? monster.goldReward
+        : Math.ceil((rand(BALANCE.rewards.normalGoldMin, BALANCE.rewards.normalGoldMax) + stageIndex * BALANCE.rewards.goldPerStage) * multiplier);
       state.player.exp += expReward;
       state.player.gold += goldReward;
       audioController.playSfx("victory");
@@ -2629,20 +4171,51 @@
       setCombatAnimation("death", MONSTER_ANIMATION_DURATIONS.death);
 
       addCombatLog("combatLogs.victory", { monsterName: monsterNameParam(monster), exp: expReward, gold: goldReward });
-      addLog("logs.victory", { monsterName: monsterNameParam(monster), exp: expReward, gold: goldReward });
+      addLog(boss ? "logs.bossVictory" : "logs.victory", {
+        bossName: boss ? bossNameParam(boss) : undefined,
+        monsterName: monsterNameParam(monster),
+        exp: expReward,
+        gold: goldReward
+      });
+
+      if (hasRelic("emberCharm") && state.player.hp < state.player.maxHp) {
+        const relic = relicDefinition("emberCharm");
+        const healed = Math.min(relic.killHeal, state.player.maxHp - state.player.hp);
+        state.player.hp += healed;
+        addCombatLog("combatLogs.relicKillHeal", { relicName: relicNameParam(relic.id), amount: healed });
+        addLog("logs.relicKillHeal", { relicName: relicNameParam(relic.id), amount: healed });
+      }
+
       scheduleCombatResolution(() => {
         state.currentMonster = null;
         state.combatAnimation = null;
         clearCombatEffects();
-        advanceStory("combatTrace", { stageName: translatedParam(`stages.${currentStage().id}.name`) });
+        if (boss) {
+          unlockStageAfterBoss(boss);
+          grantBossRelic(boss.id);
+        } else {
+          advanceStory("combatTrace", { stageName: translatedParam(`stages.${currentStage().id}.name`) });
+          if (monster.source === "event" && monster.eventId) {
+            grantEventRelic(monster.eventId);
+          }
+        }
         checkLevelUps();
         state.activeScreen = "adventure";
+        saveGame();
       }, MONSTER_ANIMATION_DURATIONS.death);
     }
 
     function handleDefeat() {
       const monster = state.currentMonster;
-      const lostGold = Math.min(state.player.gold, rand(3, 10));
+      ensurePlayerCombatState();
+      let lostGold = Math.min(state.player.gold, rand(3, 10));
+      if (hasRelic("burialCoin") && !state.player.relicStates.burialCoinSpent) {
+        lostGold = 0;
+        state.player.relicStates.burialCoinSpent = true;
+        addCombatLog("combatLogs.relicDeathProtection", { relicName: relicNameParam("burialCoin") });
+        addLog("logs.relicDeathProtection", { relicName: relicNameParam("burialCoin") });
+      }
+
       state.player.gold -= lostGold;
       state.player.hp = 1;
       audioController.playSfx("defeat");
@@ -2656,6 +4229,7 @@
         state.combatAnimation = null;
         clearCombatEffects();
         state.activeScreen = "adventure";
+        saveGame();
       }, MONSTER_ANIMATION_DURATIONS.attack);
     }
 
@@ -2681,11 +4255,41 @@
         state.currentMonster = null;
         clearCombatEffects();
         state.activeScreen = "adventure";
+        saveGame();
         render();
         return;
       }
 
       addCombatLog("combatLogs.fleeFail");
+      ensurePlayerCombatState();
+      ensureMonsterCombatState(monster);
+
+      if (monsterAbilityId(monster) === "shadowBeast") {
+        const config = MONSTER_ABILITIES.shadowBeast;
+        const rawPenalty = Math.max(
+          config.fleePenaltyMin,
+          calculateDamage(Math.ceil(monster.attack * config.fleePenaltyMultiplier), playerEffectiveDefense())
+        );
+        let penalty = rawPenalty;
+        if (hasRelic("shadowTether")) {
+          const relic = relicDefinition("shadowTether");
+          penalty = Math.max(1, Math.ceil(rawPenalty * relic.shadowFleePenaltyMultiplier));
+          addCombatLog("combatLogs.relicFleeGuard", {
+            relicName: relicNameParam(relic.id),
+            amount: rawPenalty - penalty
+          });
+        }
+
+        state.player.hp = Math.max(0, state.player.hp - penalty);
+        audioController.playSfx("playerHit");
+        addCombatLog("combatLogs.shadowFleePunish", { monsterName: monsterNameParam(monster), damage: penalty });
+        if (state.player.hp <= 0) {
+          handleDefeat();
+          render();
+          return;
+        }
+      }
+
       monsterAttack();
       render();
     }
@@ -2698,14 +4302,17 @@
         player.exp -= neededExp;
         player.level += 1;
 
-        const attackIncrease = rand(1, 3);
-        const defenseIncrease = rand(1, 2);
-        const hpIncrease = rand(2, 5);
+        const attackIncrease = rand(BALANCE.levelUp.attackMin, BALANCE.levelUp.attackMax);
+        const defenseIncrease = rand(BALANCE.levelUp.defenseMin, BALANCE.levelUp.defenseMax);
+        const hpIncrease = rand(BALANCE.levelUp.hpMin, BALANCE.levelUp.hpMax);
         player.attack += attackIncrease;
         player.defense += defenseIncrease;
         player.maxHp += hpIncrease;
 
-        const restoredHp = Math.min(player.maxHp - player.hp, Math.ceil(hpIncrease * 0.5) + 4);
+        const restoredHp = Math.min(
+          player.maxHp - player.hp,
+          Math.ceil(hpIncrease * BALANCE.levelUp.restoreHpMultiplier) + BALANCE.levelUp.restoreBase
+        );
         player.hp += restoredHp;
         audioController.playSfx("levelUp");
         addLog("logs.levelUp", {
@@ -2735,6 +4342,7 @@
       player.potions += 1;
       audioController.playSfx("purchase");
       addLog("logs.purchaseSuccess", { price: POTION_PRICE });
+      saveGame();
       render();
     }
 
@@ -2780,16 +4388,41 @@
         return;
       }
 
-      const healed = Math.min(rand(POTION_HEAL.min, POTION_HEAL.max), player.maxHp - player.hp);
+      const baseHeal = rand(POTION_HEAL.min, POTION_HEAL.max);
+      let healed = Math.min(baseHeal, player.maxHp - player.hp);
+      let relicBonus = 0;
+      if (hasRelic("waxsealedVial") && healed > 0) {
+        const relic = relicDefinition("waxsealedVial");
+        const totalHeal = Math.min(baseHeal + relic.potionBonus, player.maxHp - player.hp);
+        relicBonus = Math.max(0, totalHeal - healed);
+        healed = totalHeal;
+      }
+
       player.hp += healed;
       player.potions -= 1;
       audioController.playSfx("potion");
       log(`${potionLogScope}.usePotion`, { amount: healed });
+      if (relicBonus > 0) {
+        log(`${potionLogScope}.relicPotionBoost`, {
+          relicName: relicNameParam("waxsealedVial"),
+          amount: relicBonus
+        });
+      }
 
       if (context === "combat" && hasActiveCombat()) {
+        const statusDefeatedPlayer = applyPlayerStatusEffects();
+        if (statusDefeatedPlayer) {
+          handleDefeat();
+          render();
+          return;
+        }
+
         monsterAttack();
       }
 
+      if (context === "inventory") {
+        saveGame();
+      }
       render();
     }
 
@@ -2893,6 +4526,43 @@
       `;
     }
 
+    function formatSavedAt(savedAt) {
+      if (!savedAt) {
+        return t("main.saveUnknownTime");
+      }
+
+      const date = new Date(savedAt);
+      if (Number.isNaN(date.getTime())) {
+        return t("main.saveUnknownTime");
+      }
+
+      return date.toLocaleString(currentLanguage === "zhHant" ? "zh-Hant" : "en");
+    }
+
+    function renderSavePanel() {
+      const hasSave = Boolean(saveMetadata);
+      const continueDisabled = hasSave ? "" : " disabled";
+      const summary = hasSave
+        ? `
+          <p>${escapeHtml(t("main.saveAvailable"))}</p>
+          <p class="muted">${escapeHtml(t("main.saveLastSaved", { time: formatSavedAt(saveMetadata.savedAt) }))}</p>
+          <p class="muted">${escapeHtml(t("main.saveVersion", { version: saveMetadata.saveVersion || SAVE_VERSION }))}</p>
+        `
+        : `<p class="muted">${escapeHtml(t("main.saveEmpty"))}</p>`;
+
+      return `
+        <div class="guide">
+          <h3>${escapeHtml(t("main.saveHeading"))}</h3>
+          ${summary}
+          <div class="actions">
+            <button type="button" onclick="startNewGame()">${escapeHtml(t("actions.newGame"))}</button>
+            <button type="button" onclick="continueGame()"${continueDisabled}>${escapeHtml(t("actions.continueGame"))}</button>
+            <button type="button" onclick="resetProgress()">${escapeHtml(t("actions.resetProgress"))}</button>
+          </div>
+        </div>
+      `;
+    }
+
     function renderMain() {
       return `
         <section class="panel">
@@ -2906,6 +4576,7 @@
           <div class="guide">
             ${escapeHtml(t("main.guide"))}
           </div>
+          ${renderSavePanel()}
           <div class="actions">
             <button type="button" onclick="setScreen('adventure')">${escapeHtml(t("actions.startAdventure"))}</button>
             <button type="button" onclick="setScreen('shop')">${escapeHtml(t("actions.goShop"))}</button>
@@ -2915,10 +4586,48 @@
       `;
     }
 
+    function renderExplorationEvent() {
+      ensureStoryProgressState();
+      const eventId = state.story.activeEvent?.id;
+
+      if (!eventId || !EXPLORATION_EVENT_IDS.includes(eventId)) {
+        return "";
+      }
+
+      const option = (choice, labelKey, descriptionKey) => `
+        <div class="skill-card">
+          <button type="button" onclick="handleExplorationEventChoice('${escapeHtml(eventId)}', '${escapeHtml(choice)}')">${escapeHtml(t(`events.${eventId}.${labelKey}`))}</button>
+          <p>${escapeHtml(t(`events.${eventId}.${descriptionKey}`))}</p>
+        </div>
+      `;
+
+      return `
+        <div class="event-card">
+          <h3>${escapeHtml(t(`events.${eventId}.title`))}</h3>
+          <p>${escapeHtml(t(`events.${eventId}.description`))}</p>
+          <div class="event-options">
+            ${option("safe", "safeLabel", "safeDescription")}
+            ${option("risk", "riskLabel", "riskDescription")}
+            ${option("resource", "resourceLabel", "resourceDescription")}
+          </div>
+        </div>
+      `;
+    }
+
     function renderAdventure() {
       const stageIndex = currentStageIndex();
       const stageName = stageText(stageIndex, "name");
       const stageDescription = stageText(stageIndex, "description");
+      const boss = pendingBossDefinition();
+      const eventActive = Boolean(state.story.activeEvent);
+      const expeditionComplete = Boolean(state.story.expeditionComplete);
+      const eventDisabled = eventActive || expeditionComplete ? " disabled" : "";
+      const progressionDisabled = expeditionComplete || eventActive;
+      const bossCallout = expeditionComplete
+        ? `<div class="guide boss-callout">${escapeHtml(t("adventure.expeditionComplete"))}</div>`
+        : boss
+          ? `<div class="guide boss-callout"><strong>${escapeHtml(t("adventure.bossReady"))}</strong><br>${escapeHtml(t("adventure.bossPending", { bossName: bossDisplayName(boss) }))}</div>`
+          : "";
 
       return `
         <section class="panel">
@@ -2932,15 +4641,18 @@
           <div class="info-grid">
             <div><strong>${escapeHtml(t("common.progressedEvents"))}</strong><br>${escapeHtml(t("common.eventCount", { count: state.story.progress }))}</div>
             <div><strong>${escapeHtml(t("common.currentStatus"))}</strong><br>${escapeHtml(currentStoryStatus())}</div>
+            <div><strong>${escapeHtml(t("common.chapterGoal"))}</strong><br>${escapeHtml(adventureGoalText())}</div>
           </div>
+          ${bossCallout}
           <div class="actions">
-            <button type="button" onclick="handleAdventureChoice('forest')">${escapeHtml(t("actions.enterForest"))}</button>
-            <button type="button" onclick="handleAdventureChoice('cave')" ${state.story.stage < 1 ? "disabled" : ""}>${escapeHtml(t("actions.exploreCave"))}</button>
-            <button type="button" onclick="handleAdventureChoice('village')">${escapeHtml(t("actions.goVillage"))}</button>
-            <button type="button" onclick="handleAdventureChoice('challenge')">${escapeHtml(t("actions.challengeMonster"))}</button>
+            <button type="button" onclick="handleAdventureChoice('forest')"${eventDisabled}>${escapeHtml(t("actions.enterForest"))}</button>
+            <button type="button" onclick="handleAdventureChoice('cave')" ${state.story.stage < 1 || progressionDisabled ? "disabled" : ""}>${escapeHtml(t("actions.exploreCave"))}</button>
+            <button type="button" onclick="handleAdventureChoice('village')"${eventDisabled}>${escapeHtml(t("actions.goVillage"))}</button>
+            <button type="button" onclick="handleAdventureChoice('${boss ? "challengeBoss" : "challenge"}')"${eventDisabled}>${escapeHtml(t(boss ? "actions.challengeBoss" : "actions.challengeMonster"))}</button>
             <button type="button" onclick="handleAdventureChoice('rest')">${escapeHtml(t("actions.rest"))}</button>
-            <button type="button" onclick="handleAdventureChoice('deep')" ${state.story.stage < 2 ? "disabled" : ""}>${escapeHtml(t("actions.goDeeper"))}</button>
+            <button type="button" onclick="handleAdventureChoice('deep')" ${state.story.stage < 2 || progressionDisabled ? "disabled" : ""}>${escapeHtml(t("actions.goDeeper"))}</button>
           </div>
+          ${renderExplorationEvent()}
         </section>
       `;
     }
@@ -3057,6 +4769,7 @@
 
     function renderProfile() {
       const { player } = state;
+      ensurePlayerCombatState();
 
       return `
         <section class="panel">
@@ -3077,13 +4790,16 @@
             <div><strong>${escapeHtml(t("profile.labels.gold"))}</strong><br>${player.gold}</div>
             <div><strong>${escapeHtml(t("profile.labels.potions"))}</strong><br>${player.potions}</div>
             <div><strong>${escapeHtml(t("profile.labels.status"))}</strong><br>${escapeHtml(currentStoryStatus())}</div>
+            <div><strong>${escapeHtml(t("relics.heading"))}</strong><br>${escapeHtml(t("profile.relicSummary", { count: player.relics.length }))}</div>
           </div>
+          ${renderRelicList()}
         </section>
       `;
     }
 
     function renderInventory() {
       const { player: p } = state;
+      ensurePlayerCombatState();
       const disabled = p.potions <= 0 || p.hp >= p.maxHp ? " disabled" : "";
 
       return `
@@ -3100,6 +4816,8 @@
               <button type="button" onclick="usePotion('inventory')"${disabled}>${escapeHtml(t("actions.usePotion"))}</button>
             </div>
           </div>
+          <h3>${escapeHtml(t("inventory.relicSection"))}</h3>
+          ${renderRelicList()}
         </section>
       `;
     }
@@ -3194,6 +4912,7 @@
       }
     });
 
+    readSavePayload();
     render();
   </script>
 </body>
