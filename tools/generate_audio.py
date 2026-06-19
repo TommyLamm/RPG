@@ -546,8 +546,9 @@ SFX_RENDERERS = {
 def _validate_runtime() -> None:
     if sys.version_info[:2] != (3, 12):
         raise RuntimeError(f"Python 3.12 is required, found {sys.version.split()[0]}")
-    if np.__version__ != "2.3.2":
-        raise RuntimeError(f"NumPy 2.3.2 is required, found {np.__version__}")
+    numpy_version = tuple(int(part) for part in np.__version__.split(".")[:2])
+    if numpy_version != (2, 3):
+        raise RuntimeError(f"NumPy 2.3.x is required, found {np.__version__}")
 
 
 def _load_manifest() -> dict[str, object]:

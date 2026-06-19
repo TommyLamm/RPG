@@ -9,12 +9,13 @@ const manifest = JSON.parse(
 const assets = [
   ...manifest.scenes,
   ...Object.values(manifest.monsters),
+  ...Object.values(manifest.monsterActions).flatMap((actions) => Object.values(actions)),
   manifest.shop,
   manifest.potion
 ];
 
-if (assets.length !== 14 || new Set(assets).size !== 14) {
-  throw new Error("asset manifest must contain 14 unique assets");
+if (assets.length !== 38 || new Set(assets).size !== 38) {
+  throw new Error("asset manifest must contain 38 unique assets");
 }
 
 for (const asset of assets) {

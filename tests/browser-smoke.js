@@ -44,6 +44,10 @@ async function resetAudioProbe(page) {
   await page.evaluate(() => window.__audioProbe.reset());
 }
 
+async function waitForCombatIdle(page) {
+  await page.waitForFunction(() => !state.combatAnimation && !state.combatResolution);
+}
+
 (async () => {
   let browser;
 
@@ -151,6 +155,7 @@ async function resetAudioProbe(page) {
   assert(await page.getByRole("heading", { name: "Combat", exact: true }).isVisible(), "English combat did not open");
   assert(await page.getByRole("button", { name: "Attack", exact: true }).isVisible(), "English attack button is missing");
   await page.getByRole("button", { name: "Attack", exact: true }).click();
+  await page.waitForFunction(() => state.combatLogs.map(formatLogEntry).some(item => item.includes("counters")));
   const englishCombatLogs = await page.evaluate(() => state.combatLogs.map(formatLogEntry));
   const englishAttackIndex = englishCombatLogs.findIndex(item => item.startsWith("You attack"));
   const englishCounterIndex = englishCombatLogs.findIndex(item => item.includes("counters"));
@@ -190,11 +195,19 @@ async function resetAudioProbe(page) {
     monsters: monsterAssets && typeof monsterAssets === "object"
       ? Object.keys(monsterAssets).length
       : 0,
+    monsterActionSets: monsterActionAssets && typeof monsterActionAssets === "object"
+      ? Object.keys(monsterActionAssets).length
+      : 0,
+    monsterActions: monsterActionAssets && typeof monsterActionAssets === "object"
+      ? Object.values(monsterActionAssets).flatMap(actions => Object.values(actions)).length
+      : 0,
     sceneStage: typeof sceneStage,
     potionImage: typeof renderPotionImage
   }));
   assert(visualApi.scenes === 4, "scene asset mapping missing");
   assert(visualApi.monsters === 8, "monster asset mapping missing");
+  assert(visualApi.monsterActionSets === 8, "monster action asset mapping missing");
+  assert(visualApi.monsterActions === 24, "monster action asset count mismatch");
   assert(visualApi.sceneStage === "function", "scene stage helper missing");
   assert(visualApi.potionImage === "function", "potion image helper missing");
   const audioApi = await page.evaluate(() => ({
@@ -286,6 +299,14 @@ async function resetAudioProbe(page) {
   assert(await page.getByRole("button", { name: "商店" }).isDisabled(), "navigation is not locked during combat");
   const beforeAttack = await state(page);
   await page.getByRole("button", { name: "攻擊", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".monster-art")?.dataset.monsterAction === "hurt");
+  const hurtSource = await page.locator(".monster-art").evaluate(image => image.src);
+  assert(hurtSource.includes("-hurt.webp"), `hurt monster action did not render: ${hurtSource}`);
+  await page.waitForFunction(() => document.querySelector(".monster-art")?.dataset.monsterAction === "attack");
+  const attackSource = await page.locator(".monster-art").evaluate(image => image.src);
+  assert(attackSource.includes("-attack.webp"), `attack monster action did not render: ${attackSource}`);
+  await page.waitForFunction(beforeHp => state.player.hp < beforeHp, beforeAttack.player.hp);
+  await waitForCombatIdle(page);
   snapshot = await state(page);
   assert(snapshot.monster.hp < beforeAttack.monster.hp, "player attack did not damage monster");
   assert(snapshot.player.hp < beforeAttack.player.hp, "monster did not counterattack");
@@ -297,7 +318,7 @@ async function resetAudioProbe(page) {
   const attackIndex = snapshot.combatLogs.findIndex(item => item.startsWith("你攻擊"));
   const counterIndex = snapshot.combatLogs.findIndex(item => item.includes("反擊"));
   assert(attackIndex >= 0 && counterIndex > attackIndex, "combat log is not chronological");
-  assert(await page.getByRole("button", { name: "攻擊", exact: true }).evaluate(button => document.activeElement === button), "focus was not restored after combat render");
+  assert(await page.getByRole("button", { name: "攻擊", exact: true }).isEnabled(), "attack button was not re-enabled after combat animation");
   assert((await page.locator("#game-announcer").textContent()).trim().length > 0, "persistent game announcer did not update");
 
   const beforeCombatPotion = await state(page);
@@ -308,6 +329,7 @@ async function resetAudioProbe(page) {
   const potionIndex = snapshot.combatLogs.findIndex(item => item.startsWith("使用黑燭藥劑"));
   const potionCounterIndex = snapshot.combatLogs.findIndex((item, index) => index > potionIndex && item.includes("反擊"));
   assert(potionIndex >= 0 && potionCounterIndex > potionIndex, "combat potion did not consume exactly one enemy turn in order");
+  await waitForCombatIdle(page);
 
   await page.screenshot({ path: path.join(artifactDir, "visual-rpg-combat.png"), fullPage: true });
 
@@ -353,8 +375,12 @@ async function resetAudioProbe(page) {
     render();
   });
   await page.getByRole("button", { name: "攻擊", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".monster-art")?.dataset.monsterAction === "death");
+  const deathSource = await page.locator(".monster-art").evaluate(image => image.src);
+  assert(deathSource.includes("-death.webp"), `death monster action did not render: ${deathSource}`);
   await assertAudioPlayed(page, "sfx-victory.wav", "victory did not request victory SFX");
   await assertAudioPlayed(page, "sfx-gold.wav", "victory gold reward did not request gold SFX");
+  await page.waitForFunction(() => state.activeScreen === "adventure" && state.currentMonster === null);
 
   await resetAudioProbe(page);
   await page.evaluate(() => {
@@ -373,7 +399,9 @@ async function resetAudioProbe(page) {
     monsterAttack();
     render();
   });
+  await page.waitForFunction(() => document.querySelector(".monster-art")?.dataset.monsterAction === "attack");
   await assertAudioPlayed(page, "sfx-defeat.wav", "defeat did not request defeat SFX");
+  await page.waitForFunction(() => state.activeScreen === "adventure" && state.currentMonster === null);
 
   await resetAudioProbe(page);
   await page.evaluate(() => {
@@ -407,6 +435,7 @@ async function resetAudioProbe(page) {
   await page.getByRole("button", { name: "攻擊", exact: true }).click();
   snapshot = await state(page);
   assert(snapshot.monster && snapshot.monster.hp < 30, "gameplay stopped after media playback rejection");
+  await waitForCombatIdle(page);
 
   const monsterNames = ["史萊姆", "哥布林", "骷髏兵", "野狼", "暗影獸", "腐肉守衛", "墓穴獵手", "黑燭信徒"];
   for (const name of monsterNames) {

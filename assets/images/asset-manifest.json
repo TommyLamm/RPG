@@ -15,6 +15,48 @@
     "墓穴猎手": "monster-tomb-hunter.webp",
     "黑烛信徒": "monster-black-candle-cultist.webp"
   },
+  "monsterActions": {
+    "史莱姆": {
+      "attack": "monster-actions/monster-slime-attack.webp",
+      "hurt": "monster-actions/monster-slime-hurt.webp",
+      "death": "monster-actions/monster-slime-death.webp"
+    },
+    "哥布林": {
+      "attack": "monster-actions/monster-goblin-attack.webp",
+      "hurt": "monster-actions/monster-goblin-hurt.webp",
+      "death": "monster-actions/monster-goblin-death.webp"
+    },
+    "骷髅兵": {
+      "attack": "monster-actions/monster-skeleton-attack.webp",
+      "hurt": "monster-actions/monster-skeleton-hurt.webp",
+      "death": "monster-actions/monster-skeleton-death.webp"
+    },
+    "野狼": {
+      "attack": "monster-actions/monster-wolf-attack.webp",
+      "hurt": "monster-actions/monster-wolf-hurt.webp",
+      "death": "monster-actions/monster-wolf-death.webp"
+    },
+    "暗影兽": {
+      "attack": "monster-actions/monster-shadow-beast-attack.webp",
+      "hurt": "monster-actions/monster-shadow-beast-hurt.webp",
+      "death": "monster-actions/monster-shadow-beast-death.webp"
+    },
+    "腐肉守卫": {
+      "attack": "monster-actions/monster-flesh-guard-attack.webp",
+      "hurt": "monster-actions/monster-flesh-guard-hurt.webp",
+      "death": "monster-actions/monster-flesh-guard-death.webp"
+    },
+    "墓穴猎手": {
+      "attack": "monster-actions/monster-tomb-hunter-attack.webp",
+      "hurt": "monster-actions/monster-tomb-hunter-hurt.webp",
+      "death": "monster-actions/monster-tomb-hunter-death.webp"
+    },
+    "黑烛信徒": {
+      "attack": "monster-actions/monster-black-candle-cultist-attack.webp",
+      "hurt": "monster-actions/monster-black-candle-cultist-hurt.webp",
+      "death": "monster-actions/monster-black-candle-cultist-death.webp"
+    }
+  },
   "shop": "scene-black-candle-shop.webp",
   "potion": "item-black-candle-potion.webp"
 }

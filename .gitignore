@@ -1,0 +1,6 @@
+node_modules/
+.pnpm-store/
+debug.log
+tmp/imagegen/monster-actions/
+__pycache__/
+*.pyc
