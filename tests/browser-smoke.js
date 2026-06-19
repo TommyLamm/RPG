@@ -321,6 +321,72 @@ async function waitForCombatIdle(page) {
   assert(await page.getByRole("button", { name: "攻擊", exact: true }).isEnabled(), "attack button was not re-enabled after combat animation");
   assert((await page.locator("#game-announcer").textContent()).trim().length > 0, "persistent game announcer did not update");
 
+  await page.evaluate(() => {
+    state.player.hp = 20;
+    state.player.maxHp = 20;
+    state.player.attack = 8;
+    state.player.defense = 0;
+    state.player.effects = {};
+    state.currentMonster = {
+      monsterId: "goblin",
+      name: "哥布林",
+      maxHp: 60,
+      hp: 60,
+      attack: 12,
+      defense: 1,
+      ability: "goblin",
+      statusEffects: {},
+      strong: false,
+      source: "smoke"
+    };
+    state.combatLogs = [];
+    state.activeScreen = "combat";
+    render();
+  });
+  for (const label of ["攻擊", "重擊", "防禦", "黑焰詛咒"]) {
+    assert(await page.getByRole("button", { name: label, exact: true }).isVisible(), `skill button missing: ${label}`);
+  }
+  assert(await page.getByText("造成較高傷害", { exact: false }).isVisible(), "skill description is missing");
+
+  const beforeDefend = await state(page);
+  await page.getByRole("button", { name: "防禦", exact: true }).click();
+  await waitForCombatIdle(page);
+  snapshot = await state(page);
+  assert(beforeDefend.player.hp - snapshot.player.hp < 12, "defend skill did not reduce incoming damage");
+  assert(snapshot.combatLogs.some(item => item.includes("傷害降低")), "defend reduction log is missing");
+
+  const beforeBurnHp = snapshot.monster.hp;
+  await page.getByRole("button", { name: "黑焰詛咒", exact: true }).click();
+  await waitForCombatIdle(page);
+  snapshot = await state(page);
+  assert(snapshot.monster.hp <= beforeBurnHp - 7, "burning curse did not apply direct and ongoing damage");
+  assert(snapshot.monster.statusEffects.burn && snapshot.monster.statusEffects.burn.turns === 1, "burn status did not remain after first tick");
+  assert(snapshot.combatLogs.some(item => item.includes("持續傷害")), "burn tick log is missing");
+  assert(await page.getByRole("button", { name: "黑焰詛咒", exact: true }).isDisabled(), "burning curse should be disabled while the enemy is already burning");
+
+  await page.evaluate(() => {
+    state.player.hp = 10;
+    state.player.maxHp = 20;
+    state.player.defense = 10;
+    state.player.potions = 1;
+    state.player.effects = {};
+    state.currentMonster = {
+      monsterId: "goblin",
+      name: "哥布林",
+      maxHp: 40,
+      hp: 40,
+      attack: 5,
+      defense: 1,
+      ability: "goblin",
+      statusEffects: {},
+      strong: false,
+      source: "smoke"
+    };
+    state.combatLogs = [];
+    state.activeScreen = "combat";
+    render();
+  });
+
   const beforeCombatPotion = await state(page);
   await page.getByRole("button", { name: "使用藥劑" }).click();
   snapshot = await state(page);
